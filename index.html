@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Entrenador de Blind · Método OP</title>
+  <style>
+    :root {
+      --bg: #090e1a;
+      --panel: rgba(17, 24, 39, .82);
+      --panel-2: rgba(31, 41, 55, .82);
+      --text: #f8fafc;
+      --muted: #9ca3af;
+      --line: rgba(255,255,255,.10);
+      --accent: #8b5cf6;
+      --accent-2: #22d3ee;
+      --ok: #34d399;
+      --bad: #fb7185;
+      --warn: #fbbf24;
+      --shadow: 0 28px 90px rgba(0,0,0,.45);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(139,92,246,.24), transparent 32rem),
+        radial-gradient(circle at 85% 15%, rgba(34,211,238,.17), transparent 28rem),
+        radial-gradient(circle at 70% 90%, rgba(52,211,153,.10), transparent 30rem),
+        var(--bg);
+      padding: max(16px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { width: min(980px, 100%); margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo {
+      width: 44px; height:44px; border-radius:14px; display:grid; place-items:center;
+      font-weight: 900; letter-spacing:-1px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 30px rgba(139,92,246,.30);
+    }
+    h1 { font-size: clamp(1.05rem, 3vw, 1.4rem); margin:0; }
+    .subtitle { color:var(--muted); font-size:.84rem; margin-top:2px; }
+    .icon-btn {
+      border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--text);
+      border-radius:14px; padding:10px 13px;
+    }
+    .panel {
+      background: var(--panel);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .setup { padding: clamp(20px, 4vw, 34px); }
+    .setup h2 { margin:0 0 7px; font-size:clamp(1.35rem, 4vw, 2rem); }
+    .setup p { color:var(--muted); margin:0 0 22px; line-height:1.55; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .field label { display:block; color:#cbd5e1; font-size:.86rem; font-weight:700; margin:0 0 7px; }
+    select, .text-input {
+      width:100%; border:1px solid var(--line); color:var(--text); background:#111827;
+      border-radius:14px; padding:13px 14px; outline:none;
+    }
+    select:focus, .text-input:focus { border-color:var(--accent-2); box-shadow:0 0 0 3px rgba(34,211,238,.13); }
+    .checkrow {
+      margin-top:14px; display:flex; align-items:center; gap:9px; color:#d1d5db; font-size:.92rem;
+    }
+    .checkrow input { width:18px; height:18px; accent-color:var(--accent); }
+    .primary {
+      border:0; border-radius:15px; padding:14px 18px; color:white; font-weight:850;
+      background:linear-gradient(135deg,var(--accent),#6366f1);
+      box-shadow:0 12px 30px rgba(99,102,241,.28);
+    }
+    .start-btn { width:100%; margin-top:22px; font-size:1.05rem; }
+    .stats-strip {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
+    }
+    .stat {
+      padding:12px 10px; text-align:center; border:1px solid var(--line);
+      border-radius:17px; background:rgba(255,255,255,.045);
+    }
+    .stat strong { display:block; font-size:1.2rem; }
+    .stat span { color:var(--muted); font-size:.74rem; }
+    .game { display:none; }
+    .game.show { display:block; }
+    .card { padding: clamp(18px,4vw,36px); text-align:center; position:relative; overflow:hidden; }
+    .card:before {
+      content:""; position:absolute; inset:-1px; pointer-events:none;
+      background:linear-gradient(135deg,rgba(139,92,246,.10),transparent 44%,rgba(34,211,238,.08));
+    }
+    .progress-line { height:7px; background:rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin-bottom:26px; }
+    .progress-line div { height:100%; width:0; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .25s ease; }
+    .counter { color:var(--muted); font-size:.85rem; letter-spacing:.04em; text-transform:uppercase; }
+    .letters {
+      position:relative;
+      width:100%;
+      font-size:clamp(4.7rem,21vw,10rem);
+      line-height:1.04;
+      font-weight:950;
+      letter-spacing:-.035em;
+      margin:10px 0 14px;
+      padding:0 .08em;
+      text-align:center;
+      white-space:nowrap;
+      text-shadow:0 16px 40px rgba(0,0,0,.35);
+    }
+    .letters span {
+      display:inline-block;
+      max-width:100%;
+      padding:0 .12em .06em;
+      background:linear-gradient(135deg,#fff 20%,#c4b5fd 55%,#67e8f9);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .answer-wrap { width:min(600px,100%); margin:0 auto; position:relative; }
+    .answer {
+      width:100%; text-align:center; border:2px solid rgba(255,255,255,.12); color:var(--text);
+      background:rgba(3,7,18,.65); border-radius:18px; padding:16px 18px; font-size:1.12rem; outline:none;
+    }
+    .answer:focus { border-color:var(--accent-2); box-shadow:0 0 0 4px rgba(34,211,238,.12); }
+    .feedback {
+      display:none;
+      width:min(660px,100%);
+      min-height:52px;
+      margin:8px auto 0;
+      padding:9px 12px;
+      border:1px solid transparent;
+      border-radius:14px;
+      font-weight:800;
+      text-align:center;
+      outline:none;
+    }
+    .feedback.ok {
+      display:block;
+      color:var(--ok);
+      border-color:rgba(52,211,153,.50);
+      background:rgba(52,211,153,.11);
+      box-shadow:0 10px 30px rgba(52,211,153,.08);
+    }
+    .feedback.bad {
+      display:block;
+      color:var(--bad);
+      border-color:rgba(251,113,133,.52);
+      background:rgba(251,113,133,.11);
+      box-shadow:0 10px 30px rgba(251,113,133,.08);
+    }
+    .feedback-title {
+      display:block;
+      font-size:clamp(1rem,3.2vw,1.28rem);
+      line-height:1.1;
+      font-weight:950;
+      letter-spacing:.025em;
+      margin-bottom:3px;
+    }
+    .feedback-detail {
+      display:block;
+      color:#e5e7eb;
+      font-size:.88rem;
+      line-height:1.3;
+    }
+    .feedback .expected {
+      color:#fff;
+      font-size:.96rem;
+      font-weight:900;
+    }
+    .actions {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(660px,100%); margin:10px auto 0;
+    }
+    .btn {
+      border:1px solid var(--line); color:var(--text); border-radius:15px; padding:13px 11px;
+      background:rgba(255,255,255,.06); font-weight:780;
+    }
+    .btn:hover { background:rgba(255,255,255,.10); }
+    .btn-check { background:linear-gradient(135deg,var(--accent),#6366f1); border:0; }
+    .btn-skip { color:#fcd34d; }
+    .session-actions { display:flex; justify-content:center; gap:8px; margin-top:15px; flex-wrap:wrap; }
+    .mini { padding:8px 11px; font-size:.8rem; color:var(--muted); }
+
+    .confirmation {
+      width:min(660px,100%);
+      margin:7px auto 0;
+      padding:9px;
+      border:1px solid rgba(251,191,36,.28);
+      border-radius:14px;
+      background:rgba(251,191,36,.08);
+    }
+    .confirmation strong {
+      display:block;
+      margin-bottom:7px;
+      color:#fde68a;
+      font-size:.88rem;
+    }
+    .confirmation-actions {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:7px;
+    }
+    .confirmation-actions .btn {
+      padding:9px 8px;
+      font-size:.84rem;
+    }
+    .confirm-yes { border-color:rgba(52,211,153,.35); color:#a7f3d0; }
+    .confirm-no { border-color:rgba(251,113,133,.35); color:#fecdd3; }
+    .continue-box {
+      width:min(660px,100%);
+      margin:7px auto 0;
+    }
+    .continue-box .primary { width:100%; }
+    .stats-overview {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; margin:16px 0;
+    }
+    #statsDialog {
+      width:min(950px,calc(100% - 20px));
+      max-height:94vh;
+      overflow:hidden;
+    }
+    #statsDialog .dialog-inner {
+      display:block;
+      max-height:94vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      overscroll-behavior:contain;
+      scrollbar-gutter:stable;
+      padding-bottom:14px;
+    }
+    #statsDialog .dialog-actions {
+      position:sticky;
+      bottom:-14px;
+      z-index:5;
+      margin:18px -22px -14px;
+      padding:12px 22px 14px;
+      background:linear-gradient(to top,#101827 75%,rgba(16,24,39,.92));
+      border-top:1px solid var(--line);
+    }
+    .sessions-list {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:visible;
+      padding-right:0;
+    }
+    .session-card {
+      border:1px solid var(--line); border-radius:16px; overflow:hidden;
+      background:rgba(3,7,18,.28);
+    }
+    .session-card summary {
+      display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:14px;
+      padding:14px 15px; cursor:pointer; list-style:none;
+    }
+    .session-card summary::-webkit-details-marker { display:none; }
+    .session-card summary::after {
+      content:"▾"; color:var(--muted); font-size:1.05rem; transition:transform .2s ease;
+      grid-column:3;
+    }
+    .session-card[open] summary::after { transform:rotate(180deg); }
+    .session-title strong { display:block; font-size:.96rem; }
+    .session-title small { display:block; color:var(--muted); margin-top:4px; }
+    .session-score { display:flex; align-items:center; justify-content:flex-end; gap:7px; flex-wrap:wrap; }
+    .score-pill {
+      display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px;
+      padding:5px 9px; font-size:.78rem; font-weight:800; white-space:nowrap;
+    }
+    .score-pill.ok { color:#a7f3d0; border-color:rgba(52,211,153,.30); background:rgba(52,211,153,.07); }
+    .score-pill.bad { color:#fecdd3; border-color:rgba(251,113,133,.30); background:rgba(251,113,133,.07); }
+    .score-pill.pct { color:#bfdbfe; border-color:rgba(96,165,250,.30); background:rgba(96,165,250,.07); }
+    .session-details {
+      border-top:1px solid var(--line);
+      max-height:none;
+      overflow-y:visible;
+      overflow-x:auto;
+      overscroll-behavior:contain;
+      scrollbar-gutter:stable;
+    }
+    .stats-table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:.82rem;
+      min-width:660px;
+    }
+    .stats-table th, .stats-table td {
+      padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top;
+    }
+    .stats-table th {
+      background:#111827;
+      color:#cbd5e1;
+    }
+    .stats-table tr:last-child td { border-bottom:0; }
+    .result-ok { color:var(--ok); font-weight:800; }
+    .result-bad { color:var(--bad); font-weight:800; }
+    .corrected-badge {
+      display:inline-block; margin-top:3px; color:#fde68a; font-size:.68rem; font-weight:800;
+    }
+
+    .result { display:none; padding:clamp(22px,5vw,40px); }
+    .result.show { display:block; }
+    .score-ring {
+      width:150px; height:150px; border-radius:50%; margin:18px auto 24px; display:grid; place-items:center;
+      background:conic-gradient(var(--ok) var(--score), rgba(255,255,255,.08) 0);
+      position:relative;
+    }
+    .score-ring:after { content:""; position:absolute; inset:13px; border-radius:50%; background:#111827; }
+    .score-ring strong { position:relative; z-index:1; font-size:2rem; }
+    .result h2 { text-align:center; margin:0; font-size:2rem; }
+    .result p { text-align:center; color:var(--muted); }
+    .mistakes { margin-top:22px; max-height:320px; overflow:auto; border-top:1px solid var(--line); }
+    .mistake {
+      display:grid; grid-template-columns:58px 1fr; gap:12px; padding:12px 4px; border-bottom:1px solid var(--line);
+    }
+    .mistake code { font-size:1.1rem; font-weight:900; color:#c4b5fd; }
+    .mistake small { display:block; color:var(--muted); margin-top:3px; }
+    .result-buttons { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
+    dialog {
+      width:min(620px,calc(100% - 24px)); border:1px solid var(--line); border-radius:22px;
+      background:#101827; color:var(--text); box-shadow:var(--shadow); padding:0;
+    }
+    dialog::backdrop { background:rgba(0,0,0,.68); backdrop-filter:blur(5px); }
+    .dialog-inner { padding:22px; }
+    .dialog-inner h3 { margin:0 0 9px; }
+    .dialog-inner p { color:var(--muted); line-height:1.5; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; }
+
+    #editorDialog { width:min(900px,calc(100% - 24px)); }
+    .editor-layout { display:flex; flex-direction:column; max-height:min(82vh,820px); }
+    .editor-toolbar { display:grid; grid-template-columns:1fr auto; gap:10px; margin:14px 0 10px; }
+    .editor-list {
+      min-height:260px; overflow:auto; border:1px solid var(--line); border-radius:16px;
+      background:rgba(3,7,18,.34);
+    }
+    .editor-row {
+      display:grid; grid-template-columns:64px 1fr; align-items:center; gap:12px;
+      padding:9px 11px; border-bottom:1px solid var(--line);
+    }
+    .editor-row:last-child { border-bottom:0; }
+    .editor-code { font-size:1.02rem; font-weight:950; color:#c4b5fd; text-align:center; }
+    .editor-answer {
+      width:100%; border:1px solid var(--line); color:var(--text); background:#111827;
+      border-radius:11px; padding:10px 11px; outline:none;
+    }
+    .editor-answer:focus { border-color:var(--accent-2); box-shadow:0 0 0 3px rgba(34,211,238,.12); }
+    .editor-status { color:var(--muted); font-size:.82rem; align-self:center; white-space:nowrap; }
+    .editor-empty { padding:30px; text-align:center; color:var(--muted); }
+    .danger-btn { color:#fecdd3; border-color:rgba(251,113,133,.3); }
+    .hidden { display:none !important; }
+    .kbd {
+      border:1px solid rgba(255,255,255,.16); border-bottom-width:3px; border-radius:7px;
+      padding:1px 6px; font-size:.72rem; color:#cbd5e1;
+    }
+    .footer-note { text-align:center; color:#64748b; font-size:.75rem; margin:14px 0 0; }
+    @media (max-width:650px) {
+      .grid { grid-template-columns:1fr; }
+      .stats-strip, .stats-overview { grid-template-columns:repeat(2,1fr); }
+      .actions { grid-template-columns:1fr 1fr; }
+      .btn-check { grid-column:1/-1; grid-row:1; }
+      .result-buttons { grid-template-columns:1fr; }
+      .confirmation-actions { grid-template-columns:1fr; }
+      .session-card summary { grid-template-columns:1fr auto; gap:8px; }
+      .session-score { grid-column:1/-1; justify-content:flex-start; }
+      .session-card summary::after { grid-column:2; grid-row:1; }
+      .stats-table { font-size:.74rem; min-width:620px; }
+      .stats-table th, .stats-table td { padding:8px 7px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">OP</div>
+        <div>
+          <h1>Entrenador de Blind</h1>
+          <div class="subtitle"><span id="totalCards">540</span> asociaciones cargadas</div>
+        </div>
+      </div>
+      <button id="settingsBtn" class="icon-btn" aria-label="Ajustes">⚙️</button>
+    </header>
+
+    <section id="setupPanel" class="panel setup">
+      <h2>Entrenamiento de Blind método OP</h2>
+      <p>Aparecen dos letras y escribes la palabra asociada. Puedes seleccionar en el desplegable si quieres ignorar mayúsculas, tildes, signos y espacios repetidos.</p>
+      <div class="grid">
+        <div class="field">
+          <label for="sessionSize">Tamaño de la sesión</label>
+          <select id="sessionSize">
+            <option value="10" selected>10 tarjetas</option>
+            <option value="20">20 tarjetas</option>
+            <option value="50">50 tarjetas</option>
+            <option value="100">100 tarjetas</option>
+            <option value="all">Todas (540)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="orderMode">Orden</label>
+          <select id="orderMode">
+            <option value="random" selected>Aleatorio</option>
+            <option value="alpha">Alfabético</option>
+            <option value="smart">Priorizar falladas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="firstLetter">Primera letra</label>
+          <select id="firstLetter">
+            <option value="all">Todas</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="answerMode">Modo de corrección</label>
+          <select id="answerMode">
+            <option value="relaxed" selected>Flexible</option>
+            <option value="strict">Exacto salvo tildes/mayúsculas</option>
+            <option value="self">Autocorrección mental</option>
+          </select>
+        </div>
+      </div>
+      <button id="startBtn" class="primary start-btn">Empezar sesión</button>
+      <button id="editCardsQuickBtn" class="btn" style="width:100%;margin-top:10px">✏️ Editar tabla de asociaciones</button>
+      <div class="footer-note">Atajos: <span class="kbd">Enter</span> comprobar/siguiente · <span class="kbd">Espacio</span> mostrar respuesta</div>
+    </section>
+
+    <section id="gamePanel" class="game">
+      <div class="stats-strip">
+        <div class="stat"><strong id="correctStat">0</strong><span>Aciertos</span></div>
+        <div class="stat"><strong id="wrongStat">0</strong><span>Fallos</span></div>
+        <div class="stat"><strong id="streakStat">0</strong><span>Racha</span></div>
+        <div class="stat"><strong id="accuracyStat">—</strong><span>Precisión</span></div>
+      </div>
+
+      <section class="panel card">
+        <div class="progress-line"><div id="progressBar"></div></div>
+        <div id="counter" class="counter">Tarjeta 1 de 20</div>
+        <div class="letters" aria-live="polite"><span id="letters">AC</span></div>
+        <div class="answer-wrap">
+          <input id="answerInput" class="answer" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Escribe la asociación…">
+        </div>
+        <div id="feedback" class="feedback" tabindex="-1" aria-live="assertive" aria-atomic="true"></div>
+        <div id="mainActions" class="actions">
+          <button id="skipBtn" class="btn btn-skip">No la sé</button>
+          <button id="checkBtn" class="btn btn-check">Comprobar</button>
+          <button id="revealBtn" class="btn">Ver respuesta</button>
+        </div>
+        <div id="continueBox" class="continue-box hidden">
+          <button id="continueBtn" class="primary">Siguiente tarjeta</button>
+        </div>
+        <div id="correctionBox" class="confirmation hidden">
+          <strong>¿Contar como acierto?</strong>
+          <div class="confirmation-actions">
+            <button id="markCorrectBtn" class="btn confirm-yes">Sí, era un acierto</button>
+            <button id="keepWrongBtn" class="btn confirm-no">No, mantener el fallo</button>
+          </div>
+        </div>
+        <div class="session-actions">
+          <button id="undoBtn" class="btn mini" disabled>↶ Deshacer</button>
+          <button id="quitBtn" class="btn mini">Terminar sesión</button>
+        </div>
+      </section>
+    </section>
+
+    <section id="resultPanel" class="panel result">
+      <h2>Sesión terminada</h2>
+      <div id="scoreRing" class="score-ring" style="--score:0%"><strong id="scoreText">0%</strong></div>
+      <p id="resultSummary"></p>
+      <div id="mistakes" class="mistakes"></div>
+      <div class="result-buttons">
+        <button id="retryMistakesBtn" class="primary">Repasar fallos</button>
+        <button id="newSessionBtn" class="btn">Nueva sesión</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog">
+    <div class="dialog-inner">
+      <h3>Ajustes y datos</h3>
+      <p>Las definiciones personalizadas y el progreso se guardan únicamente en este navegador.</p>
+      <div class="grid">
+        <button id="editCardsBtn" class="btn">✏️ Editar asociaciones</button>
+        <button id="viewStatsBtn" class="btn">📊 Ver estadísticas</button>
+        <button id="exportStatsBtn" class="btn">⬇️ Exportar estadísticas</button>
+        <button id="resetStatsBtn" class="btn">Borrar estadísticas</button>
+      </div>
+      <div class="dialog-actions"><button id="closeSettingsBtn" class="primary">Cerrar</button></div>
+    </div>
+  </dialog>
+
+
+  <dialog id="statsDialog">
+    <div class="dialog-inner">
+      <h3>Estadísticas por partida</h3>
+      <p>Cada partida aparece con su fecha, hora, aciertos y fallos. Abre una partida y desplázate por esta ventana para consultar todas sus respuestas.</p>
+      <div class="stats-overview">
+        <div class="stat"><strong id="historySessions">0</strong><span>Partidas</span></div>
+        <div class="stat"><strong id="historyAttempts">0</strong><span>Respuestas</span></div>
+        <div class="stat"><strong id="historyCorrect">0</strong><span>Aciertos</span></div>
+        <div class="stat"><strong id="historyWrong">0</strong><span>Fallos</span></div>
+        <div class="stat"><strong id="historyAccuracy">—</strong><span>Precisión</span></div>
+      </div>
+      <div id="statsSessionsList" class="sessions-list"></div>
+      <div class="dialog-actions">
+        <button id="exportStatsDialogBtn" class="btn">Exportar CSV</button>
+        <button id="closeStatsBtn" class="primary">Cerrar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="editorDialog">
+    <div class="dialog-inner editor-layout">
+      <h3>Editor de asociaciones</h3>
+      <p>Cambia la palabra o imagen mental asociada a cada par. Las letras no se pueden modificar.</p>
+      <div class="editor-toolbar">
+        <input id="editorSearch" class="text-input" type="search" autocomplete="off" placeholder="Buscar letras o definición…">
+        <span id="editorStatus" class="editor-status"></span>
+      </div>
+      <div id="editorList" class="editor-list"></div>
+      <div class="dialog-actions" style="justify-content:space-between; flex-wrap:wrap">
+        <button id="restoreCardsBtn" class="btn danger-btn">Restaurar tabla original</button>
+        <div style="display:flex;gap:9px">
+          <button id="cancelEditorBtn" class="btn">Cancelar</button>
+          <button id="saveCardsBtn" class="primary">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+<script>
+(() => {
+  "use strict";
+
+  const ORIGINAL_CARDS = [{"code": "AC", "answer": "Aire Acondicionado"}, {"code": "AD", "answer": "Adán"}, {"code": "AE", "answer": "Air Europa"}, {"code": "AF", "answer": "África"}, {"code": "AG", "answer": "águila"}, {"code": "AH", "answer": "hada"}, {"code": "AI", "answer": "AI"}, {"code": "AJ", "answer": "ajedrez"}, {"code": "AK", "answer": "AK-47"}, {"code": "AL", "answer": "ala"}, {"code": "AN", "answer": "anillo"}, {"code": "AO", "answer": "american online"}, {"code": "AP", "answer": "access point"}, {"code": "AQ", "answer": "acuario"}, {"code": "AR", "answer": "árbol"}, {"code": "AS", "answer": "asno"}, {"code": "AT", "answer": "atún"}, {"code": "AU", "answer": "autobús"}, {"code": "AV", "answer": "avión"}, {"code": "AW", "answer": "Avatar"}, {"code": "AX", "answer": "Astérix"}, {"code": "BC", "answer": "bicicleta"}, {"code": "BD", "answer": "baldosa"}, {"code": "BF", "answer": "búfalo"}, {"code": "BG", "answer": "bodega"}, {"code": "BH", "answer": "bohemia"}, {"code": "BI", "answer": "bikini"}, {"code": "BJ", "answer": "bombjack"}, {"code": "BK", "answer": "Burger King"}, {"code": "BL", "answer": "blind"}, {"code": "BM", "answer": "Batman"}, {"code": "BN", "answer": "banana"}, {"code": "BO", "answer": "bota"}, {"code": "BP", "answer": "Beep"}, {"code": "BQ", "answer": "barbacoa"}, {"code": "BS", "answer": "bus"}, {"code": "BT", "answer": "bluetooth"}, {"code": "BU", "answer": "búho"}, {"code": "BV", "answer": "Bóveda"}, {"code": "BW", "answer": "bolera"}, {"code": "BX", "answer": "boxeo"}, {"code": "CA", "answer": "casa"}, {"code": "CB", "answer": "cabra"}, {"code": "CD", "answer": "CD"}, {"code": "CE", "answer": "Comunidad Europea"}, {"code": "CF", "answer": "café"}, {"code": "CG", "answer": "canguro"}, {"code": "CH", "answer": "churro"}, {"code": "CI", "answer": "cinta"}, {"code": "CJ", "answer": "caja"}, {"code": "CK", "answer": "coke"}, {"code": "CL", "answer": "clavo"}, {"code": "CM", "answer": "centímetro"}, {"code": "CN", "answer": "canoa"}, {"code": "CO", "answer": "coche"}, {"code": "CP", "answer": "capa"}, {"code": "CQ", "answer": "croqueta"}, {"code": "CR", "answer": "Cristiano"}, {"code": "CS", "answer": "casco"}, {"code": "CT", "answer": "castillo"}, {"code": "CU", "answer": "cubo"}, {"code": "CV", "answer": "cava"}, {"code": "CW", "answer": "cowboy"}, {"code": "CX", "answer": "customer experience"}, {"code": "DA", "answer": "dado"}, {"code": "DB", "answer": "decibelio"}, {"code": "DC", "answer": "DC"}, {"code": "DE", "answer": "dedo"}, {"code": "DF", "answer": "delfín"}, {"code": "DG", "answer": "dragón"}, {"code": "DH", "answer": "ducha"}, {"code": "DI", "answer": "dinero"}, {"code": "DJ", "answer": "DJ"}, {"code": "DK", "answer": "Donkey Kong"}, {"code": "DL", "answer": "dólar"}, {"code": "DM", "answer": "decímetro"}, {"code": "DN", "answer": "duna"}, {"code": "DO", "answer": "dominó"}, {"code": "DP", "answer": "depósito"}, {"code": "DQ", "answer": "Don Quijote"}, {"code": "DR", "answer": "dron"}, {"code": "DS", "answer": "dinosaurio"}, {"code": "DT", "answer": "dátil"}, {"code": "DU", "answer": "duende"}, {"code": "DV", "answer": "DVD"}, {"code": "DW", "answer": "Dark Vader"}, {"code": "DX", "answer": "Durex"}, {"code": "EA", "answer": "Electronic Arts"}, {"code": "EC", "answer": "escoba"}, {"code": "ED", "answer": "edificio"}, {"code": "EF", "answer": "efeméride"}, {"code": "EG", "answer": "Egipto"}, {"code": "EH", "answer": "EH-Bildu"}, {"code": "EI", "answer": "Einstein"}, {"code": "EJ", "answer": "ejército"}, {"code": "EK", "answer": "Ewok"}, {"code": "EL", "answer": "elástico"}, {"code": "EN", "answer": "energía"}, {"code": "EO", "answer": "EO"}, {"code": "EP", "answer": "espía"}, {"code": "EQ", "answer": "esquí"}, {"code": "ER", "answer": "erizo"}, {"code": "ES", "answer": "España"}, {"code": "ET", "answer": "E.T."}, {"code": "EU", "answer": "euro"}, {"code": "EV", "answer": "vehículo eléctrico"}, {"code": "EW", "answer": "Emma Watson"}, {"code": "EX", "answer": "éxito"}, {"code": "FA", "answer": "Fallout"}, {"code": "FB", "answer": "fútbol"}, {"code": "FC", "answer": "fútbol club"}, {"code": "FD", "answer": "fideo"}, {"code": "FE", "answer": "ferrari"}, {"code": "FG", "answer": "fuego"}, {"code": "FH", "answer": "flecha"}, {"code": "FI", "answer": "ficha"}, {"code": "FJ", "answer": "faja"}, {"code": "FK", "answer": "fake"}, {"code": "FL", "answer": "flor"}, {"code": "FM", "answer": "fantasma"}, {"code": "FN", "answer": "fénix"}, {"code": "FO", "answer": "foca"}, {"code": "FP", "answer": "Felipe"}, {"code": "FQ", "answer": "faquir"}, {"code": "FR", "answer": "fresa"}, {"code": "FS", "answer": "fósforo"}, {"code": "FT", "answer": "feet"}, {"code": "FU", "answer": "furgón"}, {"code": "FV", "answer": "favela"}, {"code": "FW", "answer": "firewall"}, {"code": "FX", "answer": "FX"}, {"code": "GA", "answer": "gato"}, {"code": "GB", "answer": "Gran Bretaña"}, {"code": "GC", "answer": "geocaching"}, {"code": "GD", "answer": "gordo"}, {"code": "GE", "answer": "gel"}, {"code": "GF", "answer": "gafas"}, {"code": "GH", "answer": "gancho"}, {"code": "GI", "answer": "gimnasio"}, {"code": "GJ", "answer": "granja"}, {"code": "GK", "answer": "Goku"}, {"code": "GL", "answer": "globo"}, {"code": "GM", "answer": "goma"}, {"code": "GN", "answer": "gnomo"}, {"code": "GO", "answer": "gorila"}, {"code": "GP", "answer": "Gran Prix"}, {"code": "GQ", "answer": "gazpacho"}, {"code": "GR", "answer": "grúa"}, {"code": "GS", "answer": "ganso"}, {"code": "GT", "answer": "guitarra"}, {"code": "GU", "answer": "guante"}, {"code": "GV", "answer": "gaviota"}, {"code": "GW", "answer": "George Washington"}, {"code": "GX", "answer": "Galaxy"}, {"code": "HA", "answer": "hacha"}, {"code": "HB", "answer": "hamburguesa"}, {"code": "HC", "answer": "helicóptero"}, {"code": "HD", "answer": "High Definition"}, {"code": "HE", "answer": "helado"}, {"code": "HF", "answer": "High Fidelity"}, {"code": "HG", "answer": "higo"}, {"code": "HI", "answer": "hilo"}, {"code": "HJ", "answer": "hoja"}, {"code": "HK", "answer": "Hulk"}, {"code": "HL", "answer": "High Level"}, {"code": "HM", "answer": "humo"}, {"code": "HN", "answer": "hiena"}, {"code": "HO", "answer": "horno"}, {"code": "HP", "answer": "Harry Potter"}, {"code": "HQ", "answer": "High Quality"}, {"code": "HR", "answer": "harina"}, {"code": "HS", "answer": "hueso"}, {"code": "HT", "answer": "hotel"}, {"code": "HU", "answer": "hueco"}, {"code": "HV", "answer": "huevo"}, {"code": "HW", "answer": "hardware"}, {"code": "HX", "answer": "Hellix"}, {"code": "IA", "answer": "IA"}, {"code": "IB", "answer": "Illes balears"}, {"code": "IC", "answer": "iceberg"}, {"code": "ID", "answer": "ID Card"}, {"code": "IE", "answer": "instituto de enseñanza"}, {"code": "IF", "answer": "infierno"}, {"code": "IG", "answer": "iglú"}, {"code": "IH", "answer": "vIH"}, {"code": "IJ", "answer": "injerto"}, {"code": "IK", "answer": "Ikea"}, {"code": "IL", "answer": "iluminación"}, {"code": "IM", "answer": "imán"}, {"code": "IN", "answer": "indio"}, {"code": "IO", "answer": "iOS"}, {"code": "IP", "answer": "iPad"}, {"code": "IQ", "answer": "cerebro"}, {"code": "IR", "answer": "Ironman"}, {"code": "IS", "answer": "isla"}, {"code": "IT", "answer": "Italia"}, {"code": "IU", "answer": "Izquierda Unida"}, {"code": "IV", "answer": "IVA"}, {"code": "IW", "answer": "Apple Watch"}, {"code": "IX", "answer": "índex"}, {"code": "JA", "answer": "jaula"}, {"code": "JB", "answer": "JB Whiskey"}, {"code": "JC", "answer": "Joan Canaves"}, {"code": "JD", "answer": "Jack Daniels"}, {"code": "JE", "answer": "jersey"}, {"code": "JF", "answer": "jirafa"}, {"code": "JG", "answer": "juego"}, {"code": "JH", "answer": "Jhon"}, {"code": "JI", "answer": "jinete"}, {"code": "JK", "answer": "Joker"}, {"code": "JL", "answer": "Julio"}, {"code": "JM", "answer": "jamón"}, {"code": "JN", "answer": "junio"}, {"code": "JO", "answer": "Joan"}, {"code": "JP", "answer": "Jeep"}, {"code": "JQ", "answer": "jeque"}, {"code": "JR", "answer": "jarra"}, {"code": "JS", "answer": "Jesús"}, {"code": "JT", "answer": "jet"}, {"code": "JU", "answer": "judo"}, {"code": "JV", "answer": "Javi"}, {"code": "JW", "answer": "John Wick"}, {"code": "JX", "answer": "Java X"}, {"code": "KA", "answer": "karate"}, {"code": "KB", "answer": "kebab"}, {"code": "KC", "answer": "KFC"}, {"code": "KD", "answer": "cadete"}, {"code": "KE", "answer": "ketama"}, {"code": "KF", "answer": "kéfir"}, {"code": "KG", "answer": "King Kong"}, {"code": "KH", "answer": "Khan"}, {"code": "KI", "answer": "kimono"}, {"code": "KJ", "answer": "kilojulio"}, {"code": "KL", "answer": "Klaus"}, {"code": "KM", "answer": "kilómetro"}, {"code": "KN", "answer": "Ken"}, {"code": "KO", "answer": "koala"}, {"code": "KP", "answer": "ketchup"}, {"code": "KQ", "answer": "king queen"}, {"code": "KR", "answer": "kraken"}, {"code": "KS", "answer": "kiosco"}, {"code": "KT", "answer": "kit"}, {"code": "KU", "answer": "kung-fu"}, {"code": "KV", "answer": "Kilian Vinardell"}, {"code": "KW", "answer": "kiwi"}, {"code": "KX", "answer": "Kleenex"}, {"code": "LA", "answer": "Los Ángeles"}, {"code": "LB", "answer": "lobo"}, {"code": "LC", "answer": "laca"}, {"code": "LD", "answer": "low definition"}, {"code": "LE", "answer": "león"}, {"code": "LF", "answer": "elfo"}, {"code": "LG", "answer": "Lego"}, {"code": "LH", "answer": "lechuga"}, {"code": "LI", "answer": "libro"}, {"code": "LJ", "answer": "lija"}, {"code": "LK", "answer": "Luke"}, {"code": "LM", "answer": "limón"}, {"code": "LN", "answer": "luna"}, {"code": "LO", "answer": "loro"}, {"code": "LP", "answer": "lápiz"}, {"code": "LQ", "answer": "low quality"}, {"code": "LR", "answer": "lirio"}, {"code": "LS", "answer": "lasaña"}, {"code": "LT", "answer": "lata"}, {"code": "LU", "answer": "Llucia"}, {"code": "LV", "answer": "lava"}, {"code": "LW", "answer": "Lowrider"}, {"code": "LX", "answer": "Lexus"}, {"code": "MB", "answer": "mBot"}, {"code": "MC", "answer": "Minecraft"}, {"code": "MD", "answer": "médico"}, {"code": "MF", "answer": "Mufasa"}, {"code": "MG", "answer": "mago"}, {"code": "MH", "answer": "mochila"}, {"code": "MI", "answer": "mimo"}, {"code": "MJ", "answer": "Michael Jackson"}, {"code": "MK", "answer": "Mario Kart"}, {"code": "ML", "answer": "maleta"}, {"code": "MN", "answer": "mono"}, {"code": "MO", "answer": "moto"}, {"code": "MP", "answer": "mapa"}, {"code": "MQ", "answer": "máquina"}, {"code": "MS", "answer": "mesa"}, {"code": "MT", "answer": "martillo"}, {"code": "MU", "answer": "muro"}, {"code": "MV", "answer": "móvil"}, {"code": "MW", "answer": "Microsoft"}, {"code": "MX", "answer": "México"}, {"code": "NA", "answer": "navaja"}, {"code": "NB", "answer": "New Balance"}, {"code": "NC", "answer": "No contesta"}, {"code": "ND", "answer": "nido"}, {"code": "NE", "answer": "Neumático"}, {"code": "NF", "answer": "ninfa"}, {"code": "NG", "answer": "negro"}, {"code": "NH", "answer": "nicho"}, {"code": "NI", "answer": "nispero"}, {"code": "NJ", "answer": "ninja"}, {"code": "NK", "answer": "Nike"}, {"code": "NL", "answer": "Nadal"}, {"code": "NM", "answer": "Número"}, {"code": "NO", "answer": "noria"}, {"code": "NP", "answer": "Napoleón"}, {"code": "NQ", "answer": "Níquel"}, {"code": "NR", "answer": "nariz"}, {"code": "NS", "answer": "Nintendo"}, {"code": "NT", "answer": "notable"}, {"code": "NU", "answer": "nube"}, {"code": "NV", "answer": "nave"}, {"code": "NW", "answer": "Nintendo Wii"}, {"code": "NX", "answer": "Nexus"}, {"code": "OA", "answer": "Obama"}, {"code": "OB", "answer": "Obélix"}, {"code": "OC", "answer": "oca"}, {"code": "OD", "answer": "Odín"}, {"code": "OE", "answer": "oreja"}, {"code": "OF", "answer": "oficina"}, {"code": "OG", "answer": "ogro"}, {"code": "OH", "answer": "Ohio"}, {"code": "OI", "answer": "oído"}, {"code": "OJ", "answer": "ojo"}, {"code": "OK", "answer": "okey"}, {"code": "OL", "answer": "ola"}, {"code": "OM", "answer": "ombligo"}, {"code": "ON", "answer": "onda"}, {"code": "OP", "answer": "operación"}, {"code": "OQ", "answer": "orquesta"}, {"code": "OR", "answer": "oro"}, {"code": "OS", "answer": "oso"}, {"code": "OT", "answer": "Operación Triunfo"}, {"code": "OU", "answer": "oooou"}, {"code": "OV", "answer": "ovni"}, {"code": "OW", "answer": "Obi Wan Knobi"}, {"code": "OX", "answer": "óxido"}, {"code": "PA", "answer": "Pau"}, {"code": "PB", "answer": "personal best"}, {"code": "PC", "answer": "PC"}, {"code": "PD", "answer": "pedo"}, {"code": "PE", "answer": "pera"}, {"code": "PF", "answer": "puf"}, {"code": "PG", "answer": "pingüino"}, {"code": "PH", "answer": "Philadelphia"}, {"code": "PI", "answer": "pi"}, {"code": "PJ", "answer": "pijama"}, {"code": "PK", "answer": "Pokémon"}, {"code": "PL", "answer": "plátano"}, {"code": "PM", "answer": "Palma de Mallorca"}, {"code": "PN", "answer": "pan"}, {"code": "PO", "answer": "pollo"}, {"code": "PQ", "answer": "paquete"}, {"code": "PR", "answer": "personal récord"}, {"code": "PS", "answer": "Play"}, {"code": "PT", "answer": "patata"}, {"code": "PU", "answer": "pulpo"}, {"code": "PV", "answer": "pavo"}, {"code": "PW", "answer": "PowerPoint"}, {"code": "PX", "answer": "píxel"}, {"code": "QA", "answer": "Qatar"}, {"code": "QB", "answer": "Québec"}, {"code": "QC", "answer": "quince"}, {"code": "QD", "answer": "quedada"}, {"code": "QE", "answer": "Queen"}, {"code": "QF", "answer": "queso francés"}, {"code": "QG", "answer": "queso gouda"}, {"code": "QH", "answer": "Quijote"}, {"code": "QI", "answer": "qiki"}, {"code": "QJ", "answer": "queja"}, {"code": "QK", "answer": "Quark"}, {"code": "QL", "answer": "quilate"}, {"code": "QM", "answer": "quimera"}, {"code": "QN", "answer": "quiniela"}, {"code": "QO", "answer": "quinto"}, {"code": "QP", "answer": "queso parmesano"}, {"code": "QR", "answer": "QR"}, {"code": "QS", "answer": "Quique Setién"}, {"code": "QT", "answer": "Quentin Tarantino"}, {"code": "QU", "answer": "Quito"}, {"code": "QV", "answer": "cubierto"}, {"code": "QW", "answer": "QWERTY"}, {"code": "QX", "answer": "Quicksilver"}, {"code": "RA", "answer": "radio"}, {"code": "RC", "answer": "Radio Control"}, {"code": "RD", "answer": "radar"}, {"code": "RE", "answer": "rey"}, {"code": "RF", "answer": "Radio Frecuencia"}, {"code": "RG", "answer": "regla"}, {"code": "RH", "answer": "Rihanna"}, {"code": "RI", "answer": "río"}, {"code": "RJ", "answer": "reloj"}, {"code": "RK", "answer": "Rubik"}, {"code": "RL", "answer": "relé"}, {"code": "RN", "answer": "rana"}, {"code": "RO", "answer": "robot"}, {"code": "RP", "answer": "Ready Player One"}, {"code": "RQ", "answer": "raqueta"}, {"code": "RS", "answer": "rosa"}, {"code": "RT", "answer": "retweet"}, {"code": "RU", "answer": "rueda"}, {"code": "RV", "answer": "Realidad Virtual"}, {"code": "RW", "answer": "Robin Williams"}, {"code": "RX", "answer": "Rex"}, {"code": "SA", "answer": "saco"}, {"code": "SB", "answer": "sable"}, {"code": "SC", "answer": "Santa Claus"}, {"code": "SD", "answer": "tarjeta SD"}, {"code": "SE", "answer": "seta"}, {"code": "SF", "answer": "sofá"}, {"code": "SG", "answer": "sargento"}, {"code": "SH", "answer": "Shrek"}, {"code": "SI", "answer": "sirena"}, {"code": "SJ", "answer": "sujeta"}, {"code": "SK", "answer": "Skywalker"}, {"code": "SL", "answer": "sal"}, {"code": "SM", "answer": "Speedcubing Mallorca"}, {"code": "SN", "answer": "Sonic"}, {"code": "SO", "answer": "sol"}, {"code": "SP", "answer": "Spider-Man"}, {"code": "SQ", "answer": "saque"}, {"code": "SR", "answer": "sierra"}, {"code": "ST", "answer": "satélite"}, {"code": "SU", "answer": "submarino"}, {"code": "SV", "answer": "salvavidas"}, {"code": "SW", "answer": "Star Wars"}, {"code": "SX", "answer": "saxofón"}, {"code": "TA", "answer": "taza"}, {"code": "TB", "answer": "tobogán"}, {"code": "TC", "answer": "taco"}, {"code": "TD", "answer": "toldo"}, {"code": "TE", "answer": "terminator"}, {"code": "TF", "answer": "teléfono"}, {"code": "TG", "answer": "tigre"}, {"code": "TH", "answer": "Thor"}, {"code": "TI", "answer": "tijera"}, {"code": "TJ", "answer": "tejado"}, {"code": "TK", "answer": "TikTok"}, {"code": "TL", "answer": "toalla"}, {"code": "TM", "answer": "tomate"}, {"code": "TN", "answer": "tenedor"}, {"code": "TO", "answer": "toro"}, {"code": "TP", "answer": "tapa"}, {"code": "TQ", "answer": "tequila"}, {"code": "TR", "answer": "tren"}, {"code": "TS", "answer": "tostada"}, {"code": "TU", "answer": "tubo"}, {"code": "TV", "answer": "televisión"}, {"code": "TW", "answer": "Twitter"}, {"code": "TX", "answer": "taxi"}, {"code": "UA", "answer": "Under Armour"}, {"code": "UB", "answer": "Uber"}, {"code": "UC", "answer": "unicornio"}, {"code": "UD", "answer": "unidad"}, {"code": "UE", "answer": "UE"}, {"code": "UF", "answer": "UFO"}, {"code": "UG", "answer": "ugly"}, {"code": "UH", "answer": "Última Hora"}, {"code": "UI", "answer": "UIB"}, {"code": "UJ", "answer": "Un Jedi"}, {"code": "UK", "answer": "ukelele"}, {"code": "UL", "answer": "Ulises"}, {"code": "UM", "answer": "Umberto"}, {"code": "UN", "answer": "Naciones Unidas"}, {"code": "UO", "answer": "Uooo"}, {"code": "UP", "answer": "Up"}, {"code": "UQ", "answer": "buque"}, {"code": "UR", "answer": "urna"}, {"code": "US", "answer": "United States"}, {"code": "UT", "answer": "utensilio"}, {"code": "UV", "answer": "ultravioleta"}, {"code": "UW", "answer": "Un Whiskey"}, {"code": "UX", "answer": "Unisex"}, {"code": "VA", "answer": "vaca"}, {"code": "VB", "answer": "víbora"}, {"code": "VC", "answer": "vacuna"}, {"code": "VD", "answer": "venda"}, {"code": "VE", "answer": "vespa"}, {"code": "VF", "answer": "viaje familiar"}, {"code": "VG", "answer": "Van Gogh"}, {"code": "VH", "answer": "VHS"}, {"code": "VI", "answer": "vino"}, {"code": "VJ", "answer": "viaje"}, {"code": "VK", "answer": "vikingo"}, {"code": "VL", "answer": "vela"}, {"code": "VM", "answer": "vampiro"}, {"code": "VN", "answer": "venado"}, {"code": "VO", "answer": "volcán"}, {"code": "VP", "answer": "Vado Permanente"}, {"code": "VQ", "answer": "vaquero"}, {"code": "VR", "answer": "VR"}, {"code": "VS", "answer": "vaso"}, {"code": "VT", "answer": "veto"}, {"code": "VU", "answer": "vudú"}, {"code": "VW", "answer": "Volkswagen"}, {"code": "VX", "answer": "Vox"}, {"code": "WA", "answer": "WhatsApp"}, {"code": "WB", "answer": "web"}, {"code": "WC", "answer": "váter"}, {"code": "WD", "answer": "Western Digital"}, {"code": "WE", "answer": "Wall-E"}, {"code": "WF", "answer": "WWF"}, {"code": "WG", "answer": "Wagner"}, {"code": "WH", "answer": "whisky"}, {"code": "WI", "answer": "wifi"}, {"code": "WJ", "answer": "Walter Junior"}, {"code": "WK", "answer": "wok"}, {"code": "WL", "answer": "Will"}, {"code": "WM", "answer": "Walmart"}, {"code": "WN", "answer": "Windows"}, {"code": "WO", "answer": "Wonder Woman"}, {"code": "WP", "answer": "WordPress"}, {"code": "WQ", "answer": "whisky queso"}, {"code": "WR", "answer": "world record"}, {"code": "WS", "answer": "Whill Smith"}, {"code": "WT", "answer": "waterpolo"}, {"code": "WU", "answer": "western union"}, {"code": "WV", "answer": "Wolverine"}, {"code": "WX", "answer": "wix"}, {"code": "XA", "answer": "Xavi"}, {"code": "XB", "answer": "Xbox"}, {"code": "XC", "answer": "excavadora"}, {"code": "XD", "answer": "xD"}, {"code": "XE", "answer": "Xena"}, {"code": "XF", "answer": "xilófono"}, {"code": "XG", "answer": "xungo"}, {"code": "XH", "answer": "Xavi Hernandez"}, {"code": "XI", "answer": "Xiaomi"}, {"code": "XJ", "answer": "Xuso Jones"}, {"code": "XK", "answer": "Xataka"}, {"code": "XL", "answer": "tamaño XL"}, {"code": "XM", "answer": "X-Men"}, {"code": "XN", "answer": "xenón"}, {"code": "XO", "answer": "xolo"}, {"code": "XP", "answer": "Windows XP"}, {"code": "XQ", "answer": "porque"}, {"code": "XR", "answer": "rayos X"}, {"code": "XS", "answer": "Xiste"}, {"code": "XT", "answer": "extintor"}, {"code": "XU", "answer": "Xuxa"}, {"code": "XV", "answer": "Xivato"}, {"code": "XW", "answer": "X-Wing"}];
+  let CARDS;
+  try {
+    const savedCards = JSON.parse(localStorage.getItem("opFlashCards") || "null");
+    const savedMap = new Map(Array.isArray(savedCards) ? savedCards.map(c => [c.code, c.answer]) : []);
+    CARDS = ORIGINAL_CARDS.map(c => ({ ...c, answer: savedMap.get(c.code) || c.answer }));
+  } catch {
+    CARDS = ORIGINAL_CARDS.map(c => ({ ...c }));
+  }
+  const $ = id => document.getElementById(id);
+
+  const state = {
+    deck: [],
+    index: 0,
+    correct: 0,
+    wrong: 0,
+    streak: 0,
+    answered: false,
+    currentResult: null,
+    history: [],
+    mistakes: [],
+    sessionId: "",
+    sessionSize: 0
+  };
+
+  const stats = JSON.parse(localStorage.getItem("opFlashStats") || '{}');
+  let attemptHistory = JSON.parse(localStorage.getItem("opFlashAttemptHistory") || '[]');
+  const saveStats = () => localStorage.setItem("opFlashStats", JSON.stringify(stats));
+  const saveAttemptHistory = () => localStorage.setItem("opFlashAttemptHistory", JSON.stringify(attemptHistory));
+
+  function normalizeRelaxed(value) {
+    return value
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/&/g, " y ")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function normalizeStrict(value) {
+    return value
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function acceptedAnswers(answer) {
+    return answer.split(/\s*(?:\/|;|\|)\s*/).filter(Boolean);
+  }
+
+  function shuffle(array) {
+    const a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function populateLetters() {
+    const letters = [...new Set(CARDS.map(c => c.code[0]))].sort();
+    $("firstLetter").innerHTML += letters.map(l => `<option value="${l}">${l}…</option>`).join("");
+  }
+
+  function buildDeck(customCards = null) {
+    let pool = customCards ? [...customCards] : [...CARDS];
+
+    // Una sola aparición por código, incluso en sesiones de repaso.
+    pool = [...new Map(pool.map(card => [card.code, card])).values()];
+
+    if (!customCards && $("firstLetter").value !== "all") {
+      pool = pool.filter(c => c.code.startsWith($("firstLetter").value));
+    }
+
+    const mode = $("orderMode").value;
+    if (mode === "random") pool = shuffle(pool);
+    if (mode === "alpha") pool.sort((a,b) => a.code.localeCompare(b.code));
+    if (mode === "smart") {
+      pool.sort((a,b) =>
+        (stats[b.code]?.wrong || 0) - (stats[a.code]?.wrong || 0) ||
+        (stats[a.code]?.correct || 0) - (stats[b.code]?.correct || 0) ||
+        Math.random() - .5
+      );
+    }
+
+    if (!customCards) {
+      const size = $("sessionSize").value;
+      if (size !== "all") pool = pool.slice(0, Math.min(Number(size), pool.length));
+    }
+    return pool;
+  }
+
+  function startSession(customCards = null) {
+    state.deck = buildDeck(customCards);
+    if (!state.deck.length) return;
+    state.index = 0;
+    state.correct = 0;
+    state.wrong = 0;
+    state.streak = 0;
+    state.answered = false;
+    state.currentResult = null;
+    state.history = [];
+    state.mistakes = [];
+    state.sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    state.sessionSize = state.deck.length;
+
+    $("setupPanel").classList.add("hidden");
+    $("resultPanel").classList.remove("show");
+    $("gamePanel").classList.add("show");
+    renderCard();
+  }
+
+  function currentCard() {
+    return state.deck[state.index];
+  }
+
+  function renderCard() {
+    const card = currentCard();
+    if (!card) return finishSession();
+    state.answered = false;
+    state.currentResult = null;
+    $("letters").textContent = card.code;
+    $("answerInput").value = "";
+    $("answerInput").disabled = $("answerMode").value === "self";
+    $("answerInput").placeholder = $("answerMode").value === "self" ? "Piensa la respuesta y pulsa «Ver respuesta»" : "Escribe la asociación…";
+    $("feedback").className = "feedback";
+    $("feedback").textContent = "";
+    $("mainActions").classList.remove("hidden");
+    $("continueBox").classList.add("hidden");
+    $("correctionBox").classList.add("hidden");
+    setMainActionsDisabled(false);
+    $("checkBtn").textContent = $("answerMode").value === "self" ? "La sabía" : "Comprobar";
+    $("skipBtn").textContent = $("answerMode").value === "self" ? "No la sabía" : "No la sé";
+    $("revealBtn").disabled = false;
+    $("undoBtn").disabled = state.history.length === 0;
+
+    const total = state.sessionSize;
+    $("counter").textContent = `Tarjeta ${state.index + 1} de ${total}`;
+    $("progressBar").style.width = `${(state.index / Math.max(total,1)) * 100}%`;
+    updateStats();
+    if (!$("answerInput").disabled) setTimeout(() => $("answerInput").focus(), 30);
+  }
+
+  function setMainActionsDisabled(disabled) {
+    $("checkBtn").disabled = disabled;
+    $("skipBtn").disabled = disabled;
+    $("revealBtn").disabled = disabled;
+    $("answerInput").disabled = disabled || $("answerMode").value === "self";
+  }
+
+  function isCorrect(input, answer) {
+    const mode = $("answerMode").value;
+    const normalize = mode === "strict" ? normalizeStrict : normalizeRelaxed;
+    const typed = normalize(input);
+    return acceptedAnswers(answer).some(a => normalize(a) === typed);
+  }
+
+  function makeAttemptId() {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function recordResult(ok, userAnswer, meta = {}) {
+    if (state.answered) return;
+    state.answered = true;
+
+    const card = currentCard();
+    const snapshot = {
+      index: state.index,
+      correct: state.correct,
+      wrong: state.wrong,
+      streak: state.streak,
+      mistakes: [...state.mistakes],
+      card,
+      userAnswer,
+      ok,
+      attemptId: null
+    };
+    state.history.push(snapshot);
+
+    stats[card.code] ||= { correct: 0, wrong: 0 };
+    if (ok) {
+      state.correct++;
+      state.streak++;
+      stats[card.code].correct++;
+      $("feedback").className = "feedback ok";
+      $("feedback").innerHTML = `<span class="feedback-title">¡ACIERTO!</span>`;
+    } else {
+      state.wrong++;
+      state.streak = 0;
+      stats[card.code].wrong++;
+      const item = {...card, userAnswer: userAnswer || "—"};
+      state.mistakes.push(item);
+      $("feedback").className = "feedback bad";
+      $("feedback").innerHTML = `
+        <span class="feedback-title">¡FALLO!</span>
+        <span class="feedback-detail">La palabra válida era: <span class="expected">${escapeHtml(card.answer)}</span></span>`;
+    }
+
+    const attempt = {
+      id: makeAttemptId(),
+      timestamp: new Date().toISOString(),
+      sessionId: state.sessionId,
+      position: state.index + 1,
+      sessionSize: state.sessionSize,
+      code: card.code,
+      expectedAnswer: card.answer,
+      userAnswer: userAnswer || "",
+      automaticMatch: Boolean(meta.automaticMatch),
+      finalCorrect: Boolean(ok),
+      decision: meta.decision || (ok ? "coincidencia_automática" : "fallo_automático"),
+      answerMode: $("answerMode").value
+    };
+    attemptHistory.push(attempt);
+    if (attemptHistory.length > 10000) attemptHistory = attemptHistory.slice(-10000);
+    snapshot.attemptId = attempt.id;
+
+    saveStats();
+    saveAttemptHistory();
+
+    state.currentResult = {ok, userAnswer, attemptId: attempt.id, allowCorrection: Boolean(meta.allowCorrection)};
+    const mustConfirmFailure = !ok && Boolean(meta.allowCorrection);
+
+    // Ocultamos por completo los controles de respuesta. Así el resultado no puede
+    // desaparecer por una segunda pulsación de Enter ni por un foco trasladado.
+    $("mainActions").classList.add("hidden");
+    $("answerInput").disabled = true;
+    $("continueBox").classList.toggle("hidden", mustConfirmFailure);
+    $("correctionBox").classList.toggle("hidden", !mustConfirmFailure);
+
+    if (!mustConfirmFailure) {
+      $("continueBtn").textContent =
+        state.index === state.sessionSize - 1 ? "Ver resultados" : "Siguiente tarjeta";
+    }
+
+    updateStats();
+
+    // El foco va a un panel neutro, nunca a un botón. Se hace después de terminar
+    // el evento actual para impedir que el Enter usado al comprobar active otra acción.
+    setTimeout(() => {
+      try { $("feedback").focus({preventScroll:false}); }
+      catch { $("feedback").focus(); }
+    }, 0);
+  }
+
+  function continueAfterResult() {
+    if (!state.answered || state.currentResult?.allowCorrection) return;
+    nextCard();
+  }
+
+  function correctCurrentFailure() {
+    const current = state.currentResult;
+    const snapshot = state.history[state.history.length - 1];
+    const card = currentCard();
+    if (!state.answered || !current || current.ok || !current.allowCorrection || !snapshot || snapshot.card.code !== card.code) return;
+
+    stats[card.code] ||= { correct: 0, wrong: 0 };
+    stats[card.code].wrong = Math.max(0, stats[card.code].wrong - 1);
+    stats[card.code].correct++;
+
+    state.wrong = Math.max(0, state.wrong - 1);
+    state.correct++;
+    state.streak = snapshot.streak + 1;
+    state.mistakes = state.mistakes.filter(item => item.code !== card.code);
+
+    snapshot.ok = true;
+    const attempt = attemptHistory.find(item => item.id === snapshot.attemptId);
+    if (attempt) {
+      attempt.finalCorrect = true;
+      attempt.decision = "corregido_manualmente_a_acierto";
+      attempt.correctedAt = new Date().toISOString();
+    }
+
+    current.ok = true;
+    current.allowCorrection = false;
+    $("correctionBox").classList.add("hidden");
+
+    saveStats();
+    saveAttemptHistory();
+    updateStats();
+    nextCard();
+  }
+
+  function keepCurrentFailure() {
+    const current = state.currentResult;
+    if (!state.answered || !current || current.ok || !current.allowCorrection) return;
+
+    current.allowCorrection = false;
+    $("correctionBox").classList.add("hidden");
+    nextCard();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  }
+
+  function checkAnswer(forceSelfCorrect = false) {
+    if (state.answered) return nextCard();
+
+    const mode = $("answerMode").value;
+    if (mode === "self") {
+      return recordResult(
+        forceSelfCorrect,
+        forceSelfCorrect ? "Autocorrección: la sabía" : "Autocorrección: no la sabía",
+        { automaticMatch: false, decision: forceSelfCorrect ? "autocorrección_acierto" : "autocorrección_fallo" }
+      );
+    }
+
+    const input = $("answerInput").value.trim();
+    if (!input) {
+      $("feedback").className = "feedback bad";
+      $("feedback").textContent = "Escribe una respuesta o pulsa «No la sé».";
+      $("answerInput").focus();
+      return;
+    }
+
+    if (isCorrect(input, currentCard().answer)) {
+      recordResult(true, input, { automaticMatch: true, decision: "coincidencia_automática" });
+    } else {
+      recordResult(false, input, {
+        automaticMatch: false,
+        decision: "fallo_automático_pendiente_de_posible_corrección",
+        allowCorrection: true
+      });
+    }
+  }
+
+  function revealAnswer() {
+    if (state.answered) return;
+    const card = currentCard();
+    if ($("answerMode").value === "self") {
+      $("feedback").className = "feedback";
+      $("feedback").innerHTML = `Respuesta: <span class="expected">${escapeHtml(card.answer)}</span>`;
+      $("revealBtn").disabled = true;
+      $("checkBtn").textContent = "La sabía";
+      $("skipBtn").textContent = "No la sabía";
+    } else {
+      recordResult(false, $("answerInput").value.trim() || "Respuesta mostrada", {
+        automaticMatch: false,
+        decision: "respuesta_mostrada",
+        allowCorrection: false
+      });
+    }
+  }
+
+  function skipCard() {
+    if (state.answered) return nextCard();
+    recordResult(false, $("answerInput").value.trim() || "No la sabía", {
+      automaticMatch: false,
+      decision: "no_la_se",
+      allowCorrection: false
+    });
+  }
+
+  function nextCard() {
+    if (!state.answered) return;
+    state.index++;
+    if (state.index >= state.sessionSize) finishSession();
+    else renderCard();
+  }
+
+  function undoLast() {
+    const snap = state.history.pop();
+    if (!snap) return;
+    const cardStats = stats[snap.card.code];
+    if (cardStats) {
+      if (snap.ok) cardStats.correct = Math.max(0, cardStats.correct - 1);
+      else cardStats.wrong = Math.max(0, cardStats.wrong - 1);
+      saveStats();
+    }
+    if (snap.attemptId) {
+      attemptHistory = attemptHistory.filter(item => item.id !== snap.attemptId);
+      saveAttemptHistory();
+    }
+    state.index = snap.index;
+    state.correct = snap.correct;
+    state.wrong = snap.wrong;
+    state.streak = snap.streak;
+    state.mistakes = snap.mistakes;
+    renderCard();
+  }
+
+  function updateStats() {
+    $("correctStat").textContent = state.correct;
+    $("wrongStat").textContent = state.wrong;
+    $("streakStat").textContent = state.streak;
+    const attempts = state.correct + state.wrong;
+    $("accuracyStat").textContent = attempts ? `${Math.round(state.correct / attempts * 100)}%` : "—";
+  }
+
+  function finishSession() {
+    $("gamePanel").classList.remove("show");
+    $("resultPanel").classList.add("show");
+    const attempts = state.correct + state.wrong;
+    const pct = attempts ? Math.round(state.correct / attempts * 100) : 0;
+    $("scoreRing").style.setProperty("--score", `${pct}%`);
+    $("scoreText").textContent = `${pct}%`;
+    $("resultSummary").textContent = `${state.correct} aciertos y ${state.wrong} fallos en ${attempts} respuestas.`;
+    $("mistakes").innerHTML = state.mistakes.length
+      ? state.mistakes.map(m => `<div class="mistake"><code>${m.code}</code><div><strong>${escapeHtml(m.answer)}</strong><small>Tu respuesta: ${escapeHtml(m.userAnswer)}</small></div></div>`).join("")
+      : `<p style="padding:18px 0;color:var(--ok)">¡Perfecto! No has fallado ninguna tarjeta.</p>`;
+    $("retryMistakesBtn").classList.toggle("hidden", state.mistakes.length === 0);
+  }
+
+  function newSession() {
+    $("resultPanel").classList.remove("show");
+    $("setupPanel").classList.remove("hidden");
+    $("gamePanel").classList.remove("show");
+  }
+
+
+  $("startBtn").addEventListener("click", () => startSession());
+  $("checkBtn").addEventListener("click", () => {
+    if (!state.answered) checkAnswer($("answerMode").value === "self");
+  });
+  $("skipBtn").addEventListener("click", () => {
+    if ($("answerMode").value === "self") checkAnswer(false);
+    else skipCard();
+  });
+  $("revealBtn").addEventListener("click", revealAnswer);
+  $("continueBtn").addEventListener("click", continueAfterResult);
+  $("markCorrectBtn").addEventListener("click", correctCurrentFailure);
+  $("keepWrongBtn").addEventListener("click", keepCurrentFailure);
+  $("undoBtn").addEventListener("click", undoLast);
+  $("quitBtn").addEventListener("click", () => {
+    if (confirm("¿Terminar la sesión y ver los resultados actuales?")) finishSession();
+  });
+  $("newSessionBtn").addEventListener("click", newSession);
+  $("retryMistakesBtn").addEventListener("click", () => {
+    const unique = [...new Map(state.mistakes.map(m => [m.code, {code:m.code, answer:m.answer}])).values()];
+    startSession(unique);
+  });
+  $("answerInput").addEventListener("keydown", e => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!state.answered) checkAnswer();
+  });
+  $("correctionBox").addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      $("markCorrectBtn").focus();
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      $("keepWrongBtn").focus();
+    }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.code === "Space" && $("gamePanel").classList.contains("show") && document.activeElement !== $("answerInput")) {
+      e.preventDefault();
+      revealAnswer();
+    }
+  });
+
+  const dialog = $("settingsDialog");
+  const editorDialog = $("editorDialog");
+  let editorDraft = {};
+
+  function openEditor() {
+    editorDraft = Object.fromEntries(CARDS.map(c => [c.code, c.answer]));
+    $("editorSearch").value = "";
+    renderEditor();
+    dialog.close();
+    editorDialog.showModal();
+    setTimeout(() => $("editorSearch").focus(), 30);
+  }
+
+  function renderEditor() {
+    const query = normalizeRelaxed($("editorSearch").value);
+    const visible = CARDS.filter(card =>
+      !query || normalizeRelaxed(card.code).includes(query) || normalizeRelaxed(editorDraft[card.code] || card.answer).includes(query)
+    );
+    $("editorStatus").textContent = `${visible.length} de ${CARDS.length}`;
+    $("editorList").innerHTML = visible.length
+      ? visible.map(card => `
+          <label class="editor-row">
+            <span class="editor-code">${card.code}</span>
+            <input class="editor-answer" data-code="${card.code}" value="${escapeAttribute(editorDraft[card.code] || "")}" aria-label="Definición de ${card.code}">
+          </label>`).join("")
+      : '<div class="editor-empty">No hay coincidencias.</div>';
+  }
+
+  function escapeAttribute(str) {
+    return String(str).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  }
+
+  function saveCardEdits() {
+    const emptyCodes = Object.entries(editorDraft).filter(([,answer]) => !String(answer).trim()).map(([code]) => code);
+    if (emptyCodes.length) {
+      alert(`Hay definiciones vacías: ${emptyCodes.slice(0, 8).join(", ")}${emptyCodes.length > 8 ? "…" : ""}`);
+      return;
+    }
+    CARDS = ORIGINAL_CARDS.map(card => ({ ...card, answer: String(editorDraft[card.code]).trim() }));
+    localStorage.setItem("opFlashCards", JSON.stringify(CARDS));
+
+    // Actualiza también una sesión que ya estuviera preparada.
+    const answerMap = new Map(CARDS.map(c => [c.code, c.answer]));
+    state.deck = state.deck.map(c => ({ ...c, answer: answerMap.get(c.code) || c.answer }));
+    state.mistakes = state.mistakes.map(c => ({ ...c, answer: answerMap.get(c.code) || c.answer }));
+
+    $("totalCards").textContent = CARDS.length;
+    editorDialog.close();
+    alert("Asociaciones guardadas.");
+  }
+
+
+  function formatLocalDate(iso) {
+    try {
+      return new Intl.DateTimeFormat("es-ES", {
+        dateStyle: "short",
+        timeStyle: "medium"
+      }).format(new Date(iso));
+    } catch {
+      return iso;
+    }
+  }
+
+  function formatSessionDate(iso) {
+    try {
+      const date = new Date(iso);
+      const day = new Intl.DateTimeFormat("es-ES", { dateStyle: "medium" }).format(date);
+      const time = new Intl.DateTimeFormat("es-ES", { hour: "2-digit", minute: "2-digit" }).format(date);
+      return { day, time };
+    } catch {
+      return { day: iso, time: "" };
+    }
+  }
+
+  function groupAttemptsBySession() {
+    const groups = new Map();
+    attemptHistory.forEach((item, index) => {
+      const fallback = `sin-sesion-${String(item.timestamp || "").slice(0, 16)}-${index}`;
+      const id = item.sessionId || fallback;
+      if (!groups.has(id)) groups.set(id, { id, attempts: [] });
+      groups.get(id).attempts.push(item);
+    });
+
+    return [...groups.values()].map(group => {
+      group.attempts.sort((a,b) => (a.position || 0) - (b.position || 0) || String(a.timestamp).localeCompare(String(b.timestamp)));
+      const startedAt = group.attempts.reduce((min, item) => !min || item.timestamp < min ? item.timestamp : min, "");
+      const endedAt = group.attempts.reduce((max, item) => !max || item.timestamp > max ? item.timestamp : max, "");
+      const correct = group.attempts.filter(item => item.finalCorrect).length;
+      const wrong = group.attempts.length - correct;
+      const expectedSize = Math.max(...group.attempts.map(item => Number(item.sessionSize) || 0), group.attempts.length);
+      return {
+        ...group,
+        startedAt,
+        endedAt,
+        correct,
+        wrong,
+        total: group.attempts.length,
+        expectedSize,
+        accuracy: group.attempts.length ? Math.round(correct / group.attempts.length * 100) : 0,
+        completed: group.attempts.length >= expectedSize
+      };
+    }).sort((a,b) => String(b.startedAt).localeCompare(String(a.startedAt)));
+  }
+
+  function sessionDetailTable(session) {
+    const rows = session.attempts.map(item => {
+      const corrected = item.decision === "corregido_manualmente_a_acierto";
+      return `
+        <tr>
+          <td>${escapeHtml(String(item.position || "—"))}</td>
+          <td><strong>${escapeHtml(item.code || "—")}</strong></td>
+          <td>${escapeHtml(item.userAnswer || "—")}</td>
+          <td>${escapeHtml(item.expectedAnswer || "—")}</td>
+          <td class="${item.finalCorrect ? "result-ok" : "result-bad"}">
+            ${item.finalCorrect ? "Acierto" : "Fallo"}
+            ${corrected ? '<span class="corrected-badge">Corregido manualmente</span>' : ''}
+          </td>
+        </tr>`;
+    }).join("");
+
+    return `
+      <div class="session-details">
+        <table class="stats-table">
+          <thead><tr><th>#</th><th>Par</th><th>Tu respuesta</th><th>Correcta</th><th>Resultado</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderStatistics() {
+    const sessions = groupAttemptsBySession();
+    const total = attemptHistory.length;
+    const correct = attemptHistory.filter(item => item.finalCorrect).length;
+    const wrong = total - correct;
+    const accuracy = total ? Math.round(correct / total * 100) : 0;
+
+    $("historySessions").textContent = sessions.length;
+    $("historyAttempts").textContent = total;
+    $("historyCorrect").textContent = correct;
+    $("historyWrong").textContent = wrong;
+    $("historyAccuracy").textContent = total ? `${accuracy}%` : "—";
+
+    $("statsSessionsList").innerHTML = sessions.length
+      ? sessions.map((session, index) => {
+          const {day, time} = formatSessionDate(session.startedAt);
+          const status = session.completed
+            ? `${session.total} tarjetas`
+            : `${session.total} de ${session.expectedSize} tarjetas · terminada antes de tiempo`;
+          return `
+            <details class="session-card" ${index === 0 ? "open" : ""}>
+              <summary>
+                <div class="session-title">
+                  <strong>Partida del ${escapeHtml(day)} a las ${escapeHtml(time)}</strong>
+                  <small>${escapeHtml(status)}</small>
+                </div>
+                <div class="session-score">
+                  <span class="score-pill ok">${session.correct} aciertos</span>
+                  <span class="score-pill bad">${session.wrong} fallos</span>
+                  <span class="score-pill pct">${session.accuracy}%</span>
+                </div>
+              </summary>
+              ${sessionDetailTable(session)}
+            </details>`;
+        }).join("")
+      : `<div class="editor-empty">Todavía no hay partidas guardadas.</div>`;
+  }
+
+  function openStatistics() {
+    renderStatistics();
+    dialog.close();
+    $("statsDialog").showModal();
+
+    const cards = [...$("statsSessionsList").querySelectorAll("details.session-card")];
+
+    // Solo una partida abierta cada vez. Todo el diálogo usa una única barra
+    // de desplazamiento vertical, por lo que todas las respuestas son accesibles.
+    cards.forEach(details => {
+      details.addEventListener("toggle", () => {
+        if (!details.open) return;
+
+        cards.forEach(other => {
+          if (other !== details) other.open = false;
+        });
+
+        requestAnimationFrame(() => {
+          details.scrollIntoView({block:"start", behavior:"smooth"});
+        });
+      });
+    });
+  }
+
+  function csvCell(value) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function exportStatisticsCsv() {
+    if (!attemptHistory.length) {
+      alert("Todavía no hay estadísticas para exportar.");
+      return;
+    }
+    const headers = [
+      "fecha_iso", "sesion", "posicion", "tamano_sesion", "letras",
+      "respuesta_correcta", "respuesta_usuario", "coincidencia_automatica",
+      "resultado_final", "decision", "modo"
+    ];
+    const rows = attemptHistory.map(item => [
+      item.timestamp, item.sessionId, item.position, item.sessionSize, item.code,
+      item.expectedAnswer, item.userAnswer, item.automaticMatch ? "sí" : "no",
+      item.finalCorrect ? "acierto" : "fallo", item.decision, item.answerMode
+    ]);
+    const csv = "\ufeff" + [headers, ...rows].map(row => row.map(csvCell).join(";")).join("\r\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `estadisticas_flashcards_op_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  $("settingsBtn").onclick = () => dialog.showModal();
+  $("closeSettingsBtn").onclick = () => dialog.close();
+  $("viewStatsBtn").onclick = openStatistics;
+  $("exportStatsBtn").onclick = exportStatisticsCsv;
+  $("closeStatsBtn").onclick = () => $("statsDialog").close();
+  $("exportStatsDialogBtn").onclick = exportStatisticsCsv;
+  $("editCardsBtn").onclick = openEditor;
+  $("editCardsQuickBtn").onclick = openEditor;
+  $("cancelEditorBtn").onclick = () => editorDialog.close();
+  $("saveCardsBtn").onclick = saveCardEdits;
+  $("editorSearch").addEventListener("input", renderEditor);
+  $("editorList").addEventListener("input", event => {
+    const input = event.target.closest(".editor-answer");
+    if (input) editorDraft[input.dataset.code] = input.value;
+  });
+  $("restoreCardsBtn").onclick = () => {
+    if (!confirm("¿Restaurar las 540 asociaciones originales? Se perderán tus cambios personalizados.")) return;
+    localStorage.removeItem("opFlashCards");
+    CARDS = ORIGINAL_CARDS.map(c => ({ ...c }));
+    const originalMap = new Map(CARDS.map(c => [c.code, c.answer]));
+    state.deck = state.deck.map(c => ({ ...c, answer: originalMap.get(c.code) || c.answer }));
+    state.mistakes = state.mistakes.map(c => ({ ...c, answer: originalMap.get(c.code) || c.answer }));
+    editorDraft = Object.fromEntries(CARDS.map(c => [c.code, c.answer]));
+    $("editorSearch").value = "";
+    renderEditor();
+    alert("Tabla original restaurada.");
+  };
+  $("resetStatsBtn").onclick = () => {
+    if (confirm("¿Borrar todas las estadísticas guardadas?")) {
+      localStorage.removeItem("opFlashStats");
+      localStorage.removeItem("opFlashAttemptHistory");
+      Object.keys(stats).forEach(k => delete stats[k]);
+      attemptHistory = [];
+      renderStatistics();
+      alert("Todas las partidas y estadísticas han sido borradas.");
+    }
+  };
+
+  localStorage.removeItem("opFlashPin");
+  $("totalCards").textContent = CARDS.length;
+  populateLetters();
+})();
+</script>
+</body>
+</html>
