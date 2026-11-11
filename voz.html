@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090e1a">
+<title>Blind Trainer · Modo voz JOAN</title>
+<style>
+:root{color-scheme:dark;--bg:#090e1a;--panel:#151e31;--line:#344053;--text:#f8fafc;--muted:#a5b4ca;--accent:#a78bfa;--accent2:#22d3ee;--ok:#34d399;--bad:#fb7185}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;padding:clamp(15px,3vw,30px);background:radial-gradient(circle at 15% 2%,#32265a 0,transparent 40%),radial-gradient(circle at 95% 85%,#113a47 0,transparent 38%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:700px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-size:1.15rem;font-weight:800}.brand small{display:block;color:var(--muted);font-weight:400;font-size:.82rem}.logo{display:inline-grid;place-items:center;width:39px;height:39px;border-radius:13px;background:linear-gradient(135deg,#8b5cf6,#22d3ee);margin-right:8px;font-weight:900}a{color:#b6e8ff;text-decoration:none}.panel{background:rgba(21,30,49,.93);border:1px solid var(--line);border-radius:22px;padding:clamp(17px,4vw,30px);margin-top:22px;box-shadow:0 20px 70px #0005}h1{font-size:clamp(1.45rem,4vw,2.1rem);margin:0 0 12px}p{color:var(--muted);line-height:1.5}.note{font-size:.88rem}.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}label{display:block;font-weight:700;color:#cbd5e1;font-size:.9rem;margin-bottom:6px}select,input{width:100%;min-width:0;padding:13px;border-radius:12px;border:1px solid #506079;background:#0b1324;color:var(--text);font:inherit}button{border:none;border-radius:13px;padding:13px 14px;background:#2f3c55;color:var(--text);font:inherit;font-weight:750;cursor:pointer;touch-action:manipulation}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #22d3ee;outline-offset:3px}.primary{background:linear-gradient(110deg,#7c3aed,#4f46e5);box-shadow:0 10px 26px #4f46e54d}.wide{width:100%}.muted{color:var(--muted)}.hidden{display:none!important}.badge{font-size:.76rem;background:#253349;border:1px solid #455267;padding:5px 9px;border-radius:12px;white-space:nowrap}.warn{color:#fcd34d}.counts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}.count{background:#ffffff0b;border:1px solid #ffffff1d;border-radius:12px;text-align:center;padding:10px 4px}.count strong{display:block;font-size:1.3rem}.count small{color:var(--muted);font-size:.7rem}.progress{height:7px;border-radius:99px;background:#354057;overflow:hidden;margin:18px 0 12px}.progress>div{height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width .2s}.cardno{text-align:center;color:var(--muted);font-size:.9rem}.pair{text-align:center;font-weight:900;letter-spacing:.02em;font-size:clamp(5rem,25vw,9rem);margin:8px 0 0;line-height:1.2}.status{text-align:center;min-height:72px;color:#c9d8e8;line-height:1.45;padding:6px 5px 10px;white-space:pre-line}.heard{font-weight:800;color:#fff}.good{color:var(--ok)}.error{color:var(--bad)}.buttonrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.inlineAnswer{display:flex;gap:8px;margin-top:16px}.inlineAnswer input{flex:1;min-width:0}.inlineAnswer button{flex:0 0 auto}.micro{font-size:.87rem;color:#9daec3;text-align:center;margin-top:16px}.micro strong{color:#c9e8f9}.result{padding:20px;border:1px solid #435268;border-radius:14px;margin:16px 0;text-align:center;font-size:1.2rem}.result strong{color:var(--ok)}.separator{border:0;border-top:1px solid var(--line);margin:22px 0}@media(max-width:460px){.controls{grid-template-columns:1fr}.counts{gap:5px}.count strong{font-size:1.15rem}.buttonrow button{font-size:.9rem;padding:12px 7px}.top .link{font-size:.85rem}.inlineAnswer button{font-size:.85rem}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div class="brand"><span class="logo">OP</span>Blind Trainer<small>Modo voz · JOAN · 420 asociaciones</small></div><a class="link" href="./index.html">← Entrenador clásico</a></header>
+<section id="setup" class="panel">
+<h1>Practicar sin tocar la pantalla</h1>
+<p>Escucha las letras, di tu asociación y recibe la corrección al instante. Si el reconocimiento entiende mal tu respuesta, podrás corregirla sin penalización.</p>
+<div class="controls"><div><label for="size">Tamaño de la sesión</label><select id="size"><option value="10">10 parejas</option><option value="20" selected>20 parejas</option><option value="50">50 parejas</option><option value="100">100 parejas</option><option value="420">Todas (420)</option></select></div><div><label for="order">Orden</label><select id="order"><option value="random">Aleatorio</option><option value="smart">Priorizar falladas</option><option value="alpha">Alfabético</option></select></div></div>
+<button id="start" class="primary wide">🎤 Empezar entrenamiento por voz</button>
+<p id="support" class="note"></p>
+<p id="sync" class="note"></p>
+<p class="note">Comandos: <strong>«repite»</strong>, <strong>«no la sé»</strong> y <strong>«parar»</strong>. Al detectar una respuesta distinta, di <strong>«acierto»</strong> o <strong>«fallo»</strong> para confirmar.</p>
+</section>
+<section id="game" class="panel hidden" aria-label="Entrenamiento en curso">
+<div class="counts"><div class="count"><strong id="cok">0</strong><small>Aciertos</small></div><div class="count"><strong id="cbad">0</strong><small>Fallos</small></div><div class="count"><strong id="cstreak">0</strong><small>Racha</small></div><div class="count"><strong id="cpercent">—</strong><small>Precisión</small></div></div>
+<div class="progress"><div id="bar"></div></div>
+<div id="count" class="cardno">Tarjeta 1 de 20</div><div id="pair" class="pair">BC</div>
+<div id="status" class="status" aria-live="polite">Preparado</div>
+<div id="pending" class="buttonrow hidden"><button id="accept" class="primary">✓ Era un acierto</button><button id="reject">✗ Era un fallo</button></div>
+<div class="buttonrow"><button id="repeat">🔁 Repetir letras</button><button id="retry">🎤 Escuchar</button></div>
+<div class="buttonrow"><button id="skip">No la sé</button><button id="pause">⏸ Pausar</button></div>
+<div class="inlineAnswer"><input id="typed" autocomplete="off" spellcheck="false" placeholder="O escribe la respuesta…" aria-label="Respuesta escrita"><button id="send">Comprobar</button></div>
+<div class="micro">Micrófono: <strong id="micState">En espera</strong></div>
+<hr class="separator"><button id="finish" class="wide">Terminar sesión</button>
+</section>
+<section id="ending" class="panel hidden"><h1>¡Sesión terminada!</h1><div id="summary" class="result"></div><p id="saveInfo" class="note"></p><button id="again" class="primary wide">Nueva sesión</button></section>
+</main>
+<script>
+(() => {
+'use strict';
+const ASSOCIATIONS={"BC":"bicicleta","BD":"baldosa","BF":"búfalo","BG":"Bogavante","BH":"bohemia","BI":"bikini","BJ":"bombjack","BK":"Burger King","BL":"blind","BM":"Bomba","BN":"banana","BO":"bota","BP":"Beep","BQ":"barbacoa","BS":"bus","BT":"bluetooth","BU":"búho","BV":"Bóveda","BW":"bolera","BX":"boxeo","CB":"cabra","CD":"CD","CF":"café","CG":"canguro","CH":"churro","CI":"cinta","CJ":"caja","CK":"coke","CL":"clavo","CM":"Cama","CN":"canoa","CO":"coco","CP":"capa","CQ":"croqueta","CS":"casco","CT":"castillo","CU":"cubo","CV":"cava","CW":"cowboy","CX":"customer experience","DB":"decibelio","DC":"DC","DF":"delfín","DG":"dragón","DH":"ducha","DI":"dinero","DJ":"DJ","DK":"Donkey Kong","DL":"dólar","DM":"Dama","DN":"duna","DO":"dominó","DP":"depósito","DQ":"Don Quijote","DS":"dinosaurio","DT":"dátil","DU":"duende","DV":"DVD","DW":"Dark Vader","DX":"DeXter","FB":"FBI","FC":"fútbol club","FD":"fideo","FG":"fuego","FH":"flecha","FI":"ficha","FJ":"faja","FK":"fake","FL":"flauta","FM":"FM","FN":"Fan","FO":"foca","FP":"Formación Profesional","FQ":"faquir","FS":"Fisio","FT":"feet","FU":"furgón","FV":"favela","FW":"Fibwi","FX":"FX","GB":"Gran Bretaña","GC":"Gran Canaria","GD":"gordo","GF":"gafas","GH":"gancho","GI":"gimnasio","GJ":"granja","GK":"Goku","GL":"globo","GM":"goma","GN":"gnomo","GO":"gorila","GP":"Gran Prix","GQ":"gazpacho","GS":"gusano","GT":"Gran Turismo","GU":"guante","GV":"gaviota","GW":"George Washington","GX":"Geox","HB":"hamburguesa","HC":"helicóptero","HD":"High Definition","HF":"High Fidelity","HG":"higo","HI":"hilo","HJ":"hoja","HK":"Hulk","HL":"Hielo","HM":"humo","HN":"hiena","HO":"horno","HP":"Harry Potter","HQ":"High Quality","HS":"hueso","HT":"hotel","HU":"hueco","HV":"huevo","HW":"hardware","HX":"Hellix","IB":"Illes balears","IC":"iceberg","ID":"ID Card","IF":"infierno","IG":"iglú","IH":"vIH","IJ":"injerto","IK":"Ikea","IL":"iluminación","IM":"imán","IN":"indio","IO":"iOS","IP":"iPad","IQ":"cerebro","IS":"isla","IT":"Italia","IU":"Izquierda Unida","IV":"IVA","IW":"Apple Watch","IX":"índex","JB":"JB Whiskey","JC":"Joan Canaves","JD":"Jack Daniels","JF":"Joan Francisco","JG":"juego","JH":"Jhon","JI":"jinete","JK":"Joker","JL":"Julio","JM":"jamón","JN":"junio","JO":"Joan","JP":"Japon","JQ":"jeque","JS":"Jesús","JT":"jet","JU":"julia","JV":"Javi","JW":"John Wick","JX":"Java X","KB":"kilobyte","KC":"KFC","KD":"cadete","KF":"kéfir","KG":"King Kong","KH":"Korah","KI":"kimono","KJ":"Kajon","KL":"Klaus","KM":"kilómetro","KN":"Ken","KO":"ko","KP":"ketchup","KQ":"king queen","KS":"kiosco","KT":"kit","KU":"kung-fu","KV":"Kilian Vinardell","KW":"kiwi","KX":"Kleenex","LB":"lobo","LC":"laca","LD":"low definition","LF":"elfo","LG":"LG TV","LH":"lechuga","LI":"libro","LJ":"lija","LK":"Luke","LM":"limón","LN":"luna","LO":"loro","LP":"lápiz","LQ":"low quality","LS":"lasaña","LT":"lata","LU":"Llucia","LV":"lava","LW":"Lowi","LX":"Lexus","MB":"Mobius","MC":"Minecraft","MD":"médico","MF":"Mortadelo y Filemon","MG":"mago","MH":"Moha","MI":"mimo","MJ":"Michael Jackson","MK":"Mario Kart","ML":"maleta","MN":"mono","MO":"moto","MP":"mapa","MQ":"máquina","MS":"mesa","MT":"martillo","MU":"muro","MV":"móvil","MW":"Microsoft","MX":"México","NB":"NBA","NC":"No contesta","ND":"nido","NF":"ninfa","NG":"negro","NH":"NH Hotel","NI":"níspero","NJ":"ninja","NK":"Nike","NL":"Nilo","NM":"Nemo","NO":"noria","NP":"Napoleón","NQ":"Níquel","NS":"Nintendo","NT":"notable","NU":"nube","NV":"nave","NW":"Nintendo Wii","NX":"Nexus","OB":"Obélix","OC":"oca","OD":"Odín","OF":"oficina","OG":"ogro","OH":"One Handed","OI":"oído","OJ":"ojo","OK":"okey","OL":"ola","OM":"ombligo","ON":"onda","OP":"operación","OQ":"orquesta","OS":"oso","OT":"Operación Triunfo","OU":"oooou","OV":"ovni","OW":"Obi Wan Knobi","OX":"óxido","PB":"personal best","PC":"PC","PD":"pedo","PF":"puf","PG":"pingüino","PH":"Philadelphia","PI":"pi","PJ":"pijama","PK":"Pokémon","PL":"plátano","PM":"Palma de Mallorca","PN":"pan","PO":"pollo","PQ":"paquete","PS":"Play","PT":"patata","PU":"pulpo","PV":"pavo","PW":"PowerPoint","PX":"píxel","QB":"Québec","QC":"quince","QD":"quedada","QF":"queso francés","QG":"queso gouda","QH":"Que Hostia","QI":"qiki","QJ":"queja","QK":"Quark","QL":"quilate","QM":"Queso Manchego","QN":"quiniela","QO":"quinto","QP":"queso parmesano","QS":"Quique Setién","QT":"Quentin Tarantino","QU":"Queso","QV":"Quevedo","QW":"QWERTY","QX":"Quicksilver","SB":"sable","SC":"Saco","SD":"tarjeta SD","SF":"sofá","SG":"sargento","SH":"Shrek","SI":"sirena","SJ":"Soja","SK":"Skywalker","SL":"sal","SM":"Su Majestad","SN":"Suno","SO":"sol","SP":"Sapo","SQ":"saque","ST":"satélite","SU":"submarino","SV":"Selva","SW":"Star Wars","SX":"saxofón","TB":"Travel Bug","TC":"taco","TD":"toldo","TF":"teléfono","TG":"tigre","TH":"Thor","TI":"tijera","TJ":"tejado","TK":"TikTok","TL":"toalla","TM":"tomate","TN":"Teno","TO":"toro","TP":"tapa","TQ":"tequila","TS":"tos","TU":"tubo","TV":"televisión","TW":"Twitter","TX":"taxi","UB":"Uber","UC":"unicornio","UD":"unidad","UF":"UFO","UG":"ugly","UH":"Última Hora","UI":"UIB","UJ":"Un Jedi","UK":"ukelele","UL":"Ulises","UM":"Umberto","UN":"Naciones Unidas","UO":"Uooo","UP":"Up","UQ":"buque","US":"United States","UT":"utensilio","UV":"ultravioleta","UW":"Un Whiskey","UX":"Unisex","VB":"víbora","VC":"vaca","VD":"venda","VF":"vodafone","VG":"Van Gogh","VH":"VHS","VI":"vino","VJ":"viaje","VK":"vikingo","VL":"vela","VM":"vampiro","VN":"venado","VO":"volcán","VP":"Vado Permanente","VQ":"vaquero","VS":"vaso","VT":"veto","VU":"vudú","VW":"Volkswagen","VX":"Vox","WB":"web","WC":"váter","WD":"Western Digital","WF":"WWF","WG":"Wagner","WH":"whisky","WI":"wifi","WJ":"Walter Junior","WK":"wonkaY","WL":"Will","WM":"Walmart","WN":"Windows","WO":"Wonder Woman","WP":"WordPress","WQ":"whisky queso","WS":"Whill Smith","WT":"waterpolo","WU":"western union","WV":"Wolverine","WX":"wix","XB":"Xbox","XC":"excavadora","XD":"xD","XF":"xilófono","XG":"XariG","XH":"Xavi Hernandez","XI":"Xiaomi","XJ":"Xuso Jones","XK":"Xataka","XL":"tamaño XL","XM":"X-Men","XN":"xenón","XO":"xolo","XP":"Windows XP","XQ":"porque","XS":"Talla XS","XT":"extintor","XU":"Xuxa","XV":"Xivato","XW":"X-Wing"};
+const CARDS=Object.entries(ASSOCIATIONS).map(([code,answer])=>({code,answer}));
+if(CARDS.length!==420 || new Set(CARDS.map(x=>x.code)).size!==420)throw Error('La tabla JOAN no contiene 420 parejas únicas');
+const $=id=>document.getElementById(id);
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+const browserSpeech=Boolean(SpeechRec);
+const speechOut=Boolean(window.speechSynthesis&&window.SpeechSynthesisUtterance);
+let context=null;
+let session=null;
+const voice={active:false,paused:false,ticket:0,recognition:null,timer:null,said:false,pending:null,retries:0};
+const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' y ').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+const exact=(spoken,answer)=>String(answer).split(/\s*(?:\/|;|\|)\s*/).some(a=>normalize(a)===normalize(spoken));
+function readJson(key,fallback){try{const val=localStorage.getItem(key);return val===null?fallback:JSON.parse(val)}catch{return fallback}}
+function storage(suffix){return context?.id?'blindOpProfile:'+context.id+':'+suffix:null}
+function setStatus(message,kind=''){const node=$('status');node.textContent=message;node.className='status '+kind}
+function syncContext(){
+ const profiles=readJson('blindOpProfiles',[]);
+ const joan=Array.isArray(profiles)?profiles.find(p=>String(p.name||'').trim().toUpperCase()==='JOAN'):null;
+ if(!joan){context=null;$('sync').textContent='Para compartir las estadísticas con el entrenador clásico, abre antes el perfil JOAN desde la web. Las prácticas de esta página seguirán funcionando.';return}
+ context={id:joan.id};
+ const migrate='blindOpProfile:'+joan.id+':voice420Installed-20261111';
+ const cardsKey=storage('cards');
+ if(!localStorage.getItem(migrate)){
+   const previous=localStorage.getItem(cardsKey);
+   if(previous!==null)localStorage.setItem(storage('cardsBackupBefore420-20261111'),previous);
+   localStorage.setItem(cardsKey,JSON.stringify(CARDS));
+   localStorage.removeItem(storage('randomBags'));
+   localStorage.setItem(migrate,'1');
+ }
+ $('sync').textContent='✓ Tabla JOAN actualizada a 420 asociaciones; conservadas las estadísticas anteriores. Copia de seguridad de la tabla previa guardada en este navegador.';
+}
+function smartPriority(code){const obj=readJson(storage('stats')||'blindVoiceStandaloneStats',{});let s=obj[code]||{};return Math.max(1,1+(Number(s.smartPriority)||0)*3+(Number(s.wrong)||0)/Math.max(1,(Number(s.correct)||0)+1))}
+function buildDeck(){
+ const size=Number($('size').value);const mode=$('order').value;
+ if(mode==='alpha')return CARDS.slice().sort((a,b)=>a.code.localeCompare(b.code)).slice(0,size);
+ if(mode==='smart'){
+   const pool=CARDS.map(card=>({card,priority:Math.pow(Math.random(),1/smartPriority(card.code))}));
+   pool.sort((a,b)=>b.priority-a.priority);return pool.slice(0,size).map(x=>x.card)
+ }
+ const shuffled=CARDS.slice();for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}return shuffled.slice(0,size)
+}
+function stopAudio(){voice.ticket++;clearTimeout(voice.timer);voice.timer=null;if(voice.recognition){try{voice.recognition.abort()}catch{}voice.recognition=null}if(speechOut){try{speechSynthesis.cancel()}catch{}}$('micState').textContent='En espera'}
+function announce(text,after){
+ const token=voice.ticket;if(!voice.active||voice.paused)return;
+ if(!speechOut){setTimeout(()=>{if(token===voice.ticket&&voice.active&&!voice.paused)after?.()},100);return}
+ let fired=false;function done(){if(fired)return;fired=true;clearTimeout(voice.timer);voice.timer=null;if(token===voice.ticket&&voice.active&&!voice.paused)after?.()}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='es-ES';u.rate=1.16;u.pitch=1;u.onend=done;u.onerror=done;speechSynthesis.speak(u);voice.timer=setTimeout(done,Math.min(6500,Math.max(1800,text.length*100+850)))}catch{done()}
+}
+function listen(token){
+ if(!voice.active||voice.paused||token!==voice.ticket)return;
+ if(!browserSpeech){setStatus('El navegador no dispone de reconocimiento de voz. Puedes contestar escribiendo o probar con otro navegador compatible.','warn');return}
+ const r=new SpeechRec();voice.recognition=r;r.lang='es-ES';r.interimResults=false;r.continuous=false;r.maxAlternatives=4;
+ let received=false,errored=false;
+ r.onresult=e=>{
+   received=true;if(token!==voice.ticket||voice.paused||!voice.active)return;
+   const results=Array.from(e.results[0]).map(v=>v.transcript.trim()).filter(Boolean);
+   const card=current();const matching=!voice.pending&&card?results.find(text=>exact(text,card.answer)):null;
+   setTimeout(()=>consume(matching||results[0]||'',token),100)
+ };
+ r.onerror=e=>{
+   errored=true;if(token!==voice.ticket)return;
+   if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)){voice.paused=true;setStatus('No puedo acceder al micrófono. Comprueba el permiso del navegador y toca «Reanudar».','error')}
+   else if(e.error!=='no-speech'&&e.error!=='aborted')setStatus('Problema de micrófono: '+e.error+'. Toca «Escuchar» para reintentar.','error')
+ };
+ r.onend=()=>{
+   if(voice.recognition===r)voice.recognition=null;
+   if(token!==voice.ticket||!voice.active||voice.paused)return;
+   $('micState').textContent='En espera';
+   if(!received&&!errored&&voice.retries<1){voice.retries++;setTimeout(()=>listen(token),250)}
+   else if(!received&&!errored)setStatus('No te he oído. Pulsa «Escuchar» o escribe una respuesta.');
+ };
+ try{$('micState').textContent='Escuchando';r.start()}catch(e){voice.recognition=null;setStatus('El navegador no ha iniciado el micrófono. Pulsa «Escuchar» para reintentarlo.','error')}
+}
+function current(){return session?.deck[session.index]}
+function ask(){
+ if(!session||!voice.active||voice.paused)return;
+ stopAudio();voice.retries=0;voice.pending=null;$('pending').classList.add('hidden');$('typed').value='';
+ const card=current();if(!card){finish();return}
+ render();const ticket=voice.ticket;setStatus('Escucha las letras…');
+ announce(card.code.split('').join('. ')+'.',()=>{if(ticket===voice.ticket){setStatus('Te escucho…');listen(ticket)}})
+}
+function consume(transcript,token){
+ if(!session||!voice.active||voice.paused||token!==voice.ticket)return;
+ const spoken=normalize(transcript);if(!spoken){setStatus('No te he oído. Toca «Escuchar» para repetir.');return}
+ if(['parar','para','pausa','detener','detente'].includes(spoken)){pause();return}
+ if(['repite','repetir','otra vez','repite las letras','repiteme'].includes(spoken)){ask();return}
+ if(voice.pending){
+   if(['acierto','correcto','si','si la sabia','era correcto','lo sabia'].includes(spoken)){commit(true,voice.pending.heard,true);return}
+   if(['fallo','incorrecto','no','no la sabia','no lo sabia'].includes(spoken)){commit(false,voice.pending.heard,false);return}
+   setStatus('He entendido «'+transcript+'». Di «acierto» o «fallo», o usa los botones.');announce('Di acierto o fallo',()=>listen(token));return
+ }
+ if(['no la se','no lo se','paso','saltar','me rindo'].includes(spoken)){commit(false,'No la sabía',false);return}
+ const answer=current().answer;
+ if(exact(transcript,answer)){commit(true,transcript,true);return}
+ voice.pending={heard:transcript};$('pending').classList.remove('hidden');
+ setStatus('He entendido «'+transcript+'».\nNo coincide exactamente con tu tabla. ¿Lo sabías?');
+ announce('No coincide. Di acierto o fallo',()=>listen(token))
+}
+function record(ok,said){
+ const card=current(),position=session.index+1;
+ const item={id:Date.now()+'-'+Math.random().toString(36).slice(2,9),timestamp:new Date().toISOString(),sessionId:session.id,position,sessionSize:session.deck.length,code:card.code,expectedAnswer:card.answer,userAnswer:said,automaticMatch:ok&&!voice.pending,finalCorrect:ok,decision:voice.pending?(ok?'voz_corregido_a_acierto':'voz_fallo_confirmado'):(ok?'voz_coincidencia_automatica':'voz_no_la_se'),answerMode:'voz'};
+ if(context){
+   const stats=readJson(storage('stats'),{});const one=stats[card.code]||{};
+   one.correct=(Number(one.correct)||0)+(ok?1:0);one.wrong=(Number(one.wrong)||0)+(ok?0:1);
+   one.smartPriority=ok?Math.max(0,(Number(one.smartPriority)||0)-2):Math.min(20,(Number(one.smartPriority)||0)+4);
+   one.smartCorrectStreak=ok?(Number(one.smartCorrectStreak)||0)+1:0;
+   if(one.smartCorrectStreak>=2)one.smartPriority=0;
+   one.smartLastResult=ok?'correct':'wrong';one.smartUpdatedAt=Date.now();stats[card.code]=one;
+   localStorage.setItem(storage('stats'),JSON.stringify(stats));
+   const hist=readJson(storage('attemptHistory'),[]);hist.push(item);localStorage.setItem(storage('attemptHistory'),JSON.stringify(hist.slice(-10000)));
+ }else{
+   const hist=readJson('blindVoiceStandaloneHistory',[]);hist.push(item);localStorage.setItem('blindVoiceStandaloneHistory',JSON.stringify(hist.slice(-10000)));
+   const stats=readJson('blindVoiceStandaloneStats',{});stats[card.code]||={correct:0,wrong:0};stats[card.code][ok?'correct':'wrong']++;localStorage.setItem('blindVoiceStandaloneStats',JSON.stringify(stats));
+ }
+ session.index++;if(ok){session.good++;session.streak++}else{session.bad++;session.streak=0}
+}
+function commit(ok,said){
+ if(!session||!voice.active||voice.paused)return;
+ const answer=current().answer;stopAudio();const token=voice.ticket;
+ record(ok,said);voice.pending=null;$('pending').classList.add('hidden');render();
+ setStatus(ok?'✓ Correcto':'✗ Era: '+answer,ok?'good':'error');
+ announce(ok?'Correcto':'Era '+answer,()=>{if(token===voice.ticket)ask()})
+}
+function render(){if(!session)return;
+ const card=current();$('pair').textContent=card?card.code:'✓';$('count').textContent='Tarjeta '+Math.min(session.index+1,session.deck.length)+' de '+session.deck.length;
+ $('bar').style.width=(100*session.index/session.deck.length)+'%';$('cok').textContent=session.good;$('cbad').textContent=session.bad;$('cstreak').textContent=session.streak;
+ const n=session.good+session.bad;$('cpercent').textContent=n?Math.round(session.good*100/n)+'%':'—'
+}
+function start(){
+ stopAudio();syncContext();session={deck:buildDeck(),index:0,good:0,bad:0,streak:0,id:Date.now()+'-voz-'+Math.random().toString(36).slice(2,7)};
+ $('setup').classList.add('hidden');$('ending').classList.add('hidden');$('game').classList.remove('hidden');voice.active=true;voice.paused=false;$('pause').textContent='⏸ Pausar';ask()
+}
+function pause(){if(!voice.active)return;
+ voice.paused=true;stopAudio();$('pause').textContent='▶ Reanudar';setStatus('Entrenamiento en pausa. Pulsa «Reanudar» para continuar.')
+}
+function resume(){if(!voice.active)return;
+ voice.paused=false;$('pause').textContent='⏸ Pausar';
+ if(voice.pending){const t=voice.ticket;setStatus('Di «acierto» o «fallo».');announce('Di acierto o fallo',()=>listen(t))}else ask()
+}
+function finish(){
+ if(!session)return;voice.active=false;voice.paused=true;stopAudio();$('game').classList.add('hidden');$('ending').classList.remove('hidden');
+ $('summary').innerHTML='<strong>'+session.good+' aciertos</strong> · '+session.bad+' fallos<br><small>'+ (session.good+session.bad)+' respuestas de '+session.deck.length+' parejas</small>';
+ $('saveInfo').textContent=context?'Resultados guardados en las estadísticas del perfil JOAN.':'Resultados guardados localmente. Abre primero JOAN en el entrenador clásico para compartir las próximas sesiones.';
+}
+$('support').textContent=browserSpeech?'✓ Reconocimiento de voz disponible. Acepta el permiso del micrófono al comenzar.':'⚠️ Este navegador no ofrece reconocimiento de voz. Puedes practicar escribiendo o utilizar un navegador compatible.';
+if(!speechOut)$('support').textContent+=' No se ha detectado síntesis de voz: las letras aparecerán en pantalla.';
+$('start').onclick=start;
+$('again').onclick=()=>{session=null;$('ending').classList.add('hidden');$('setup').classList.remove('hidden');syncContext()};
+$('repeat').onclick=()=>{if(voice.paused)resume();else ask()};
+$('retry').onclick=()=>{if(!voice.active)return;if(voice.paused){resume();return}stopAudio();const t=voice.ticket;setStatus('Te escucho…');listen(t)};
+$('pause').onclick=()=>voice.paused?resume():pause();
+$('skip').onclick=()=>{if(!voice.active)return;if(voice.paused){voice.paused=false;$('pause').textContent='⏸ Pausar'}commit(false,'No la sabía')};
+$('finish').onclick=finish;
+$('accept').onclick=()=>{if(voice.pending)commit(true,voice.pending.heard)};
+$('reject').onclick=()=>{if(voice.pending)commit(false,voice.pending.heard)};
+$('send').onclick=()=>{const val=$('typed').value.trim();if(!val)return;if(voice.paused)resume();if(voice.active){stopAudio();consume(val,voice.ticket)}};
+$('typed').onkeydown=e=>{if(e.key==='Enter'){$('send').click();e.preventDefault()}};
+window.addEventListener('pagehide',()=>{if(voice.active)stopAudio()});
+syncContext();
+})();
+</script>
+</body>
+</html>
